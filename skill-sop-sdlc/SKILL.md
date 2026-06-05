@@ -12,6 +12,30 @@ metadata:
 
 You are building a GS Battery internal product across the **full software development life cycle**. This skill is the single source of truth and is derived directly from the team's SOP-SDLC documentation — it stands on its own and does not depend on any other skill. The stack is fixed: **React + TypeScript + Tailwind CSS** on the frontend, **Node.js + Express + TypeScript** on the backend, **PostgreSQL** (via Supabase / RDS) for data, deployed on **Railway** (managed) or **AWS** (EC2 + RDS + S3 + CloudFront + WAF). Treat every rule below as binding — work that ignores them gets rejected at review.
 
+## Operating Model — how Sopify runs in Claude Cowork
+
+Sopify is a **Working Procedure**, not an app. A Non-Dev User runs it inside Claude Cowork to build a Web App to this SOP, then ships it to Github and Railway.
+
+### One-time setup
+- **IT** connects the **Supabase MCP Server** to Cowork.
+- The **User creates their own Github account**, then connects the **Github Connection** in Cowork — the user logs in themselves (credentials are never entered on their behalf). Repo: `https://github.com/SiamGS-Sopify`.
+
+### Entry point — `/sop`
+The user types **`/sop`** to start. This skill is a **single hub** that links every phase. It is **non-linear**: the user may enter any phase first and jump back and forth freely; the skill keeps each phase's state and artifacts. Free navigation does **not** waive the gates — a phase's output is only "final" once its quality gate passes, and Push is blocked until every phase is complete.
+
+### Phase order (non-linear, revisit allowed)
+Brainstorm → Design (Frontend) → Backend (API) → Database → Test Cases → Push to Github. The order in between is flexible; the **Gate is the single completeness check** before pushing.
+
+### Connections used per phase
+- **Database phase → Supabase:** when the user reaches Database, they ask IT to create a Supabase project; IT returns the **Token** (URL + anon key + service key) via a secure channel; the user connects it via the **Supabase MCP** in Cowork, then runs schema/migrations. Never commit the token — keep it in env.
+- **Push phase → Github:** push code to `SiamGS-Sopify` through the **Github Connection** (no zip handoff).
+
+### Deploy loop — Railway
+- **First time:** IT links the Github repo to **Railway** (service, env, build/start, `GET /api/health`).
+- **After that:** the user edits via Cowork → **auto push to `main`** → **Railway auto-deploys**. This is the continuous maintenance / development loop.
+
+The phase details below define *how* to do each phase to standard; the operating model above defines *how the user moves through them and ships*.
+
 ## The SDLC journey (do not skip phases)
 
 ```
