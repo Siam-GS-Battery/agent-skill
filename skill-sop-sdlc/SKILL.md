@@ -1,9 +1,8 @@
 ---
 name: sopify-sdlc
-description: "GS Battery end-to-end SDLC SOP — one self-contained playbook for the whole lifecycle, derived directly from the team's SOP-SDLC documentation. Covers requirements (MoSCoW, user stories, acceptance criteria, DoR/DoD), design (Figma Make brand guideline: colors, IBM Plex Sans typography, spacing, responsive), database (PostgreSQL schema, naming, constraints, indexes, triggers, migrations, RLS), development (Code Standard SOP-DEV-001: TypeScript strict, MVC layering, Zod validation, standard API response shape, security), testing (Vitest/Supertest/k6, coverage targets, quality gates), git workflow (branching, Conventional Commits, PR + code review), and deploy (Railway + AWS: EC2/RDS/S3/CloudFront/WAF, secrets, go-live). Apply at every phase. Treat every rule below as binding — work was rejected for skipping validation, tests, or pushing straight to main."
-version: 1.0.0
-platforms: [linux, macos, windows]
+description: "GS Battery end-to-end SDLC SOP — one self-contained playbook for the whole lifecycle, derived directly from the team's SOP-SDLC documentation. Covers requirements (MoSCoW, user stories, acceptance criteria, DoR/DoD), design (Figma Make brand guideline: colors, IBM Plex Sans typography, spacing, responsive), database (PostgreSQL schema, naming, constraints, indexes, triggers, migrations, RLS), development (Code Standard SOP-DEV-001: TypeScript strict, MVC layering, Zod validation, standard API response shape, security), testing (Vitest/Supertest/k6, coverage targets, quality gates), git workflow (branching, Conventional Commits, PR + code review), and deploy (Railway + AWS: EC2/RDS/S3/CloudFront/WAF, secrets, go-live). The full SOP with every template, worked example, and step-by-step guide lives in the bundled ref/ folder — consult it when working a phase. Apply at every phase. Treat every rule below as binding — work was rejected for skipping validation, tests, or pushing straight to main."
 metadata:
+  version: 1.1.0
   hermes:
     tags: [gs-battery, sopify-vibe, sdlc, requirements, design, database, backend, testing, git, deploy, aws, supabase, react, typescript, postgresql]
 ---
@@ -45,6 +44,28 @@ The phase details below define *how* to do each phase to standard; the operating
 
 Each phase has a **gate** that must pass before the next begins. Do not start a downstream phase on an unapproved upstream artifact: API shape derives from the schema, the schema derives from requirements, and the UI derives from acceptance criteria. Churn upstream means wasted work downstream.
 
+> Numbering note: the SOP labels Deploy as Phase 5 and Testing as Phase 6, but you always **test before you deploy**. This skill keeps the SOP labels for traceability while presenting Testing (Phase 6) before Deploy (Phase 5) in the order you actually work.
+
+## Reference library — the full SOP lives in `ref/`
+
+This SKILL.md is the operating summary: enough to work to standard on the common path. The team's complete SOP — every template, worked example, full schema, code-standard guide, step-by-step deploy, and the AWS build-out — lives in the `ref/` folder beside this file. The summary tells you *what* the rule is; the reference tells you *exactly how* to satisfy it, with examples.
+
+Pull the matching reference into context when you're actually doing that phase's work, when a gate item is unclear, or when you need a template/example rather than a rule. Don't preload everything — read the one file you need, when you need it. Each folder has an `INDEX.md` listing its documents; the descriptions are in Thai but the documents themselves are bilingual (Thai prose, English code and terms).
+
+| Phase | When to read | Key reference files |
+|---|---|---|
+| 0 · Onboarding | new env / access / audit setup | `ref/00_ONBOARDING/` — Welcome, Development_Setup, Access_Request, Audit_Checklist |
+| 1 · Requirements | writing stories, AC, DoR/DoD | `ref/01_REQUIREMENTS/` — 1.1 MoSCoW, 1.2 User_Story, 1.3 Acceptance_Criteria, 1.5 Definition_of_Ready_Done |
+| 2 · Design | wireframes / UI to brand | `ref/02_DESIGN/` — 2.1 Wireframe_with_Figma_Make, 2.2 UI_Design_with_Figma_Make |
+| 3 · Database | schema doc + migrations | `ref/03_DATABASE/` — 3.1 ERD, 3.2 Database_Schema_Document, 3.3 Migration_from_Figma_DataContext |
+| 4 · Development | any backend/frontend code | `ref/04_DEVELOPMENT/Code_Standard_Guide.md` (⭐ SOP-DEV-001, read first), 4.1 Project_Init, 4.1.1 Dependencies, 4.2 Import_Wireframes, 4.3 Database_Design, 4.4 Backend_Project, 4.5 Frontend_Integration |
+| 6 · Testing | writing tests / pre-release | `ref/06_TESTING/` — 6.1 Strategy, 6.2 Unit, 6.3 Integration, 6.4 Performance, 6.5 Security, UAT_Scenario_Template |
+| 7 · Git Workflow | branching, commits, PRs | `ref/07_GIT_WORKFLOW/` — 7.1 Branching, 7.2 Commit, 7.3 Pull_Request, 7.4 Code_Review, 7.5 GitHub_Actions_CI |
+| 5 · Deploy (Railway) | shipping to Railway | `ref/05_DEPLOY/` — 5.2 Pre_Deploy_Checklist, 5.3 Environment_Variables, 5.4 Deploy_Steps, 5.5 Post_Deploy_Verification, 5.6 Troubleshooting |
+| 5 · Deploy (AWS) | EC2/RDS/S3/CloudFront/WAF build | `ref/08_AWS/` — 8.0 Overview → 8.7 CICD, 8.8 Go_Live_Checklist |
+
+If a request maps cleanly to one phase (e.g. "write the migration", "set up the CI workflow"), open that phase's reference first so you reproduce the team's exact format rather than a generic one.
+
 ---
 
 ## Phase 1 — Requirements
@@ -83,6 +104,8 @@ ALL of these must be true:
 ### Quality gate (Phase 1)
 
 ✅ MoSCoW done · ✅ every story has AC · ✅ NFRs stated · ✅ DoR/DoD agreed by the team · ✅ roadmap/timeline linked.
+
+> Deep reference: `ref/01_REQUIREMENTS/` — read 1.3 for how to phrase testable AC and 1.5 for the DoR/DoD templates and worked examples before writing your own.
 
 ---
 
@@ -144,6 +167,8 @@ Desktop 1440px+ (full layout, 32px padding) · Tablet 768–1024px (24px padding
 
 ✅ colors/typography/spacing match the guideline · ✅ Tab + Enter/Space works · ✅ 375px layout doesn't break · ✅ loading/empty/error states present · ✅ no inline styles for class-expressible values · ✅ Figma exports + README committed.
 
+> Deep reference: `ref/02_DESIGN/2.1_Wireframe_with_Figma_Make.md` (wireframe prompts) and `2.2_UI_Design_with_Figma_Make.md` (full brand prompt + export-to-GitHub steps).
+
 ---
 
 ## Phase 3 — Database
@@ -203,6 +228,8 @@ Enable RLS on multi-tenant tables and write policies (e.g. users see only `is_ac
 ### Quality gate (Phase 3)
 
 ✅ every table has PK + created_at/updated_at + trigger · ✅ FKs declare ON DELETE · ✅ indexes on FK + hot columns · ✅ unique + check constraints set · ✅ data dictionary written · ✅ migrations have UP/DOWN and were tested · ✅ backup/restore documented.
+
+> Deep reference: `ref/03_DATABASE/3.2_Database_Schema_Document.md` is the full schema-doc structure to reproduce; `3.3_Database_Migration_from_Figma_DataContext.md` walks the DataContext → Supabase migration end to end; `3.1_ERD_Diagram.md` for the relationship map.
 
 ---
 
@@ -269,6 +296,8 @@ Validate input with Zod · hash passwords with bcrypt · **parameterized queries
 
 ✅ Zod covers body/query/params · ✅ auth applied (or comment justifying public) · ✅ standard response shape, custom error classes, global handler · ✅ service is unit-testable (no `req`/`res`) · ✅ no `any`, no `console.log`, no hardcoded secrets · ✅ logic in service not controller.
 
+> Deep reference: open `ref/04_DEVELOPMENT/Code_Standard_Guide.md` (SOP-DEV-001) **before writing code** — it has the full naming tables, do/don't pairs, and code examples behind every rule above. Then 4.1 Project_Initialization, 4.1.1 Dependencies_Checklist, 4.4 Backend_Project, and 4.5 Frontend_Integration for the build steps.
+
 ---
 
 ## Phase 6 — Testing
@@ -292,6 +321,8 @@ Write tests **alongside** code, not after · Arrange-Act-Assert · name tests by
 **Gate 1 — every PR (CI-enforced):** lint + type-check 0 errors · all unit tests pass · new-code coverage ≥ 70% · no `console.log` / debug code. If Gate 1 fails → do not request review.
 
 **Gate 2 — before release:** all integration tests pass · performance P95 < 2s (senior verifies) · security scan 0 critical (senior verifies) · UAT sign-off by PM / stakeholder. If Gate 2 fails → do not deploy to production.
+
+> Deep reference: `ref/06_TESTING/` — 6.2 Unit (Vitest + RTL setup and examples), 6.3 Integration (Supertest), 6.4 Performance (k6 scripts), 6.5 Security (OWASP checks), and `UAT_Scenario_Template.md` for sign-off scenarios.
 
 ---
 
@@ -322,6 +353,8 @@ Author self-reviews, ensures tests pass, fills the PR template, links the Asana 
 
 Senior always reviews: logic + edge cases, security (SQL injection, exposed secrets), readability, test coverage, standards conformance. Critique the code, not the person, and always pair feedback with a way forward ("If user is null this line crashes" — not "this is wrong"). Branch protection requires a PR + passing CI + 1 approval on `develop` (1–2 on `main`); no force-push or deletion of protected branches.
 
+> Deep reference: `ref/07_GIT_WORKFLOW/` — 7.1 Branching, 7.2 Commit_Message_Convention, 7.3 Pull_Request_Process (PR template), 7.4 Code_Review_Guidelines, and 7.5 GitHub_Actions_CI_Template (ready-to-use CI + approval gate).
+
 ---
 
 ## Phase 5 — Deploy
@@ -347,6 +380,8 @@ Security baseline:
 ### Go-live gate (Phase 5)
 
 ✅ build green locally + CI · ✅ health check responds · ✅ prod secrets set, none committed · ✅ HTTPS/SSL active · ✅ DB private + encrypted + backed up · ✅ WAF + rate limiting on · ✅ monitoring/alarms + budget alerts on · ✅ smoke + post-deploy verification passed · ✅ Release Gate 2 (Phase 6) passed.
+
+> Deep reference: Railway path → `ref/05_DEPLOY/` (5.2 Pre_Deploy_Checklist, 5.3 Environment_Variables, 5.4 Deploy_Steps, 5.5 Post_Deploy_Verification, 5.6 Troubleshooting). AWS path → `ref/08_AWS/` (8.0 → 8.7 step-by-step, 8.8 Go_Live_Checklist).
 
 ---
 

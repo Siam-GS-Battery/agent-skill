@@ -1,0 +1,29 @@
+{
+  "skill_name": "sopify-sdlc",
+  "evals": [
+    {
+      "id": 0,
+      "name": "database-schema-kaizen",
+      "prompt": "We're building a Kaizen improvement-suggestion app for the GS Battery plant. Staff submit improvement ideas, a supervisor reviews each one and approves or rejects it, and we track the status over time. Design the database for this. Give me the schema.",
+      "expected_output": "A schema-document-first deliverable (markdown doc before SQL, asks for approval), snake_case naming, id PK + created_at/updated_at + the shared updated_at trigger on every table, FKs with explicit ON DELETE, CHECK constraint on the status field, indexes on FKs and status, and a note about RLS for multi-tenant. Should reference the team's schema-doc format.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 1,
+      "prompt": "Write the backend API for battery warranty claims — one endpoint to create a claim and one to list claims with pagination. Make sure it's up to our coding standards.",
+      "name": "backend-api-warranty-claims",
+      "expected_output": "MVC layering (controller thin, logic in service, repository for SQL), Zod validation on body/query/params, the standard { success, data, pagination } response shape, custom error classes + global handler, parameterized queries, strict TypeScript with no any, correct HTTP status codes (201 create, 200 list). Should reference Code_Standard_Guide / SOP-DEV-001.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 2,
+      "prompt": "I want to start building an internal tool for our sales team to log customer visits. I'm not a developer — help me kick this off the right way.",
+      "name": "kickoff-customer-visit-tool",
+      "expected_output": "Should invoke the operating model: start at requirements (MoSCoW, user stories, acceptance criteria, DoR/DoD) before design or code, explain the phase/gate flow and that work moves phase by phase, and not jump straight into writing code. Tailored to a non-dev user.",
+      "files": [],
+      "assertions": []
+    }
+  ]
+}
