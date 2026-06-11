@@ -1,15 +1,15 @@
 ---
 name: sopify-sdlc
-description: "GS Battery end-to-end SDLC SOP — one self-contained playbook for the whole lifecycle, derived directly from the team's SOP-SDLC documentation. Covers requirements (MoSCoW, user stories, acceptance criteria, DoR/DoD), design (Figma Make brand guideline: colors, IBM Plex Sans typography, spacing, responsive), database (PostgreSQL schema, naming, constraints, indexes, triggers, migrations, RLS), development (Code Standard SOP-DEV-001: TypeScript strict, MVC layering, Zod validation, standard API response shape, security), testing (Vitest/Supertest/k6, coverage targets, quality gates), git workflow (branching, Conventional Commits, PR + code review), and deploy (Railway + AWS: EC2/RDS/S3/CloudFront/WAF, secrets, go-live). The full SOP with every template, worked example, and step-by-step guide lives in the bundled ref/ folder — consult it when working a phase. Apply at every phase. Treat every rule below as binding — work was rejected for skipping validation, tests, or pushing straight to main."
+description: "GS Battery end-to-end SDLC SOP — one self-contained playbook for the whole lifecycle, derived directly from the team's SOP-SDLC documentation. Covers requirements (MoSCoW, user stories, acceptance criteria, DoR/DoD), design (Figma Make brand guideline: colors, IBM Plex Sans typography, spacing, responsive), database (PostgreSQL schema, naming, constraints, indexes, triggers, migrations, RLS), development (Code Standard SOP-DEV-001: TypeScript strict, MVC layering, Zod validation, standard API response shape, security), testing (Vitest/Supertest/k6, coverage targets, quality gates), git workflow (branching, Conventional Commits, PR + code review), and deploy (Railway auto-deploy from main: pre-deploy checklist, secrets, health check, go-live). The full SOP with every template, worked example, and step-by-step guide lives in the bundled ref/ folder — consult it when working a phase. Includes a multi-agent pattern (PM, UXUI Design, Frontend Engineer, Backend Engineer, Tester) that delegates each phase to an isolated sub-agent so SOP rules are never lost mid-session. Apply at every phase. Treat every rule below as binding — work was rejected for skipping validation, tests, or pushing straight to main."
 metadata:
-  version: 1.1.0
+  version: 1.3.0
   hermes:
-    tags: [gs-battery, sopify-vibe, sdlc, requirements, design, database, backend, testing, git, deploy, aws, supabase, react, typescript, postgresql]
+    tags: [gs-battery, sopify-vibe, sdlc, requirements, design, database, backend, testing, git, deploy, railway, supabase, react, typescript, postgresql, multi-agent]
 ---
 
 # sopify-sdlc — GS Battery End-to-End SDLC SOP
 
-You are building a GS Battery internal product across the **full software development life cycle**. This skill is the single source of truth and is derived directly from the team's SOP-SDLC documentation — it stands on its own and does not depend on any other skill. The stack is fixed: **React + TypeScript + Tailwind CSS** on the frontend, **Node.js + Express + TypeScript** on the backend, **PostgreSQL** (via Supabase / RDS) for data, deployed on **Railway** (managed) or **AWS** (EC2 + RDS + S3 + CloudFront + WAF). Treat every rule below as binding — work that ignores them gets rejected at review.
+You are building a GS Battery internal product across the **full software development life cycle**. This skill is the single source of truth and is derived directly from the team's SOP-SDLC documentation — it stands on its own and does not depend on any other skill. The stack is fixed: **React + TypeScript + Tailwind CSS** on the frontend, **Node.js + Express + TypeScript** on the backend, **PostgreSQL** (via Supabase) for data, deployed on **Railway** — auto-deploy from the `main` branch. Treat every rule below as binding — work that ignores them gets rejected at review.
 
 ## Operating Model — how Sopify runs in Claude Cowork
 
@@ -34,6 +34,88 @@ Brainstorm → Design (Frontend) → Backend (API) → Database → Test Cases �
 - **After that:** the user edits via Cowork → **auto push to `main`** → **Railway auto-deploys**. This is the continuous maintenance / development loop.
 
 The phase details below define *how* to do each phase to standard; the operating model above defines *how the user moves through them and ships*.
+
+## Multi-Agent Pattern — PM, UXUI Design, Frontend Engineer, Backend Engineer, Tester
+
+A full SDLC run is long. If one conversation carries every phase, rules from early phases drift to the middle of the context window and get silently dropped ("lost in the middle") — that is how validation, triggers, and gates get skipped. Prevent it with an **orchestrator / worker** pattern: the main session (orchestrator) holds only the plan and phase state; each phase's heavy work runs in a **dedicated sub-agent with a fresh, isolated context** that receives its SOP slice verbatim.
+
+### Ground rules (binding)
+
+1. **Sub-agents start fresh and inherit nothing.** They do not see this skill, the conversation, or earlier phases automatically. Every delegation prompt must carry (a) the full SOP slice for that phase copied from this file, and (b) the approved upstream artifacts — passed as **file paths** to read, never as long pasted blobs.
+2. **Explicitly attach this skill to custom agents.** In Claude Code, sub-agents only load skills listed in their frontmatter `skills:` field (built-in agents cannot load skills at all). In Cowork, include the phase rules directly in the Task prompt.
+3. **One phase = one owner agent.** A worker never spans another agent's phase; cross-phase decisions return to the orchestrator.
+4. **Workers return a compact report, not a transcript:** artifact path(s) written, the phase quality-gate checklist with per-item ✅/❌, and open questions — roughly 30 lines max. The orchestrator never re-ingests full file contents into its own context.
+5. **The orchestrator keeps a phase-state ledger on disk** — `docs/PHASE_STATE.md` in the repo: one row per phase (owner agent, status, artifact path, gate result, user approval, date). Before any delegation or gate decision, **re-read the ledger from disk**, never trust conversational memory.
+6. **User approvals stay with the orchestrator.** Workers prepare approval-gated artifacts (requirements doc, schema doc) but never declare them approved — the user approves through the main session.
+7. **No phase is "final" until the Tester independently verifies its quality gate** against the actual files (agent 5 below) and the orchestrator records the result in the ledger — a worker's own ✅ is never sufficient.
+
+### Artifact chain (the handoff contract)
+
+Each agent reads its inputs and writes its outputs to fixed repo paths, so context never has to carry them:
+
+```
+PM                → docs/requirements.md (MoSCoW, stories, AC, NFRs, DoR/DoD)
+UXUI Design       → design/ (Figma Make prompts, exports, design README)        reads requirements.md
+Backend Engineer  → docs/schema.md + migrations/*.sql + docs/api-spec.md + src/backend/**   reads requirements.md
+Frontend Engineer → src/frontend/**                                              reads requirements.md + api-spec.md + design/
+Tester            → __tests__/** + docs/test-report.md + gate verdicts           reads all of the above
+all agents        → gate entries recorded by the orchestrator in docs/PHASE_STATE.md
+```
+
+### The five agents
+
+#### 1. PM Agent — Phase 1 Requirements (+ DoR/DoD enforcement, UAT sign-off prep)
+- **Delegate when:** starting a project, requirements change, or a task needs DoR/DoD arbitration.
+- **Prompt must include:** the entire *Phase 1 — Requirements* section (MoSCoW, user stories, AC, DoR/DoD, NFRs) + the user's raw brief.
+- **Produces:** `docs/requirements.md` — MoSCoW table, stories grouped by role, ≥1 testable AC per story, NFRs, roadmap/Asana link — plus UAT scenarios derived from the AC for Phase 6 Gate 2.
+- **Returns:** artifact path + Phase 1 gate checklist + questions needing user decisions.
+
+#### 2. UXUI Design Agent — Phase 2 Design
+- **Delegate when:** requirements are approved and design starts, or any screen is added/changed.
+- **Prompt must include:** the entire *Phase 2 — Design* section (brand colors, IBM Plex Sans typography, spacing/radius/layout, breakpoints, component & accessibility rules) + path to `docs/requirements.md`.
+- **Produces:** Figma Make prompts that state the brand guideline, wireframes/screens covering every story, exports (PNG @2x / SVG) committed under `design/` + design README with the Figma link, loading/empty/error states specified for every async surface.
+- **Returns:** paths + Phase 2 gate checklist (tokens match, 375px holds, Tab/Enter works, async states present).
+
+#### 3. Frontend Engineer Agent — frontend part of Phase 4
+- **Delegate when:** designs are gate-passed and the API spec exists, or any UI implementation changes.
+- **Prompt must include:** the React/TypeScript/Tailwind rules from *Phase 4 — Development* (naming, strict TS, React best practices, no inline styles) + paths to `docs/requirements.md`, `docs/api-spec.md`, and `design/`.
+- **Produces:** `src/frontend/**` — components implementing the approved designs pixel-faithfully with brand tokens, mobile-first responsive, unit tests alongside code (FE coverage ≥ 70%).
+- **Returns:** file paths + Phase 4 FE gate checklist (no `any`, no inline styles, no `console.log`, tests green).
+
+#### 4. Backend Engineer Agent — Phase 3 Database + backend part of Phase 4
+- **Delegate when:** requirements are approved and data/API design starts, or schema/endpoints change.
+- **Prompt must include:** the entire *Phase 3 — Database* and *Phase 4 — Development* backend sections (naming, required columns + trigger, constraints/indexes, migrations, RLS; MVC layering, error classes, Zod, standard response shape, security) + path to `docs/requirements.md`.
+- **Produces:** `docs/schema.md` FIRST (stop — user approval via orchestrator before any SQL), then `migrations/[timestamp]_*.sql` with UP/DOWN run via the Supabase MCP, then `docs/api-spec.md` and `src/backend/**` (Controller → Service → Repository, Zod on every body/query/params, auth middleware), unit tests alongside code (BE coverage ≥ 80%).
+- **Returns:** paths + Phase 3 gate checklist + per-endpoint Phase 4 gate checklist + confirmation rollback was tested.
+
+#### 5. Tester Agent — Phase 6 Testing + gate verification for every phase
+- **Delegate when:** any worker reports done (verify that phase's gate), when integration/E2E coverage is needed, and once more before Push/deploy (Release Gate 2).
+- **Prompt must include:** the entire *Phase 6 — Testing* section (pyramid, coverage targets, practices, Gate 1/Gate 2) + the relevant phase's **quality-gate checklist** from this file + the artifact paths to inspect + path to `docs/requirements.md` (AC = the test cases).
+- **Produces:** integration tests under `__tests__/` (Supertest, 100% of endpoints ≥ happy path), UAT scenarios from the AC, k6 performance runs (P95 < 2s) and OWASP scan results, `docs/test-report.md` with coverage numbers.
+- **Gate verification duty (read-only on others' code — it never fixes, it reports):** independently re-checks every gate item against the actual files — greps for `any`/`console.log`/inline styles, confirms triggers/ON DELETE/indexes in migrations, runs lint/type-check/tests — and returns per-item ✅/❌ with file:line evidence for every ❌. Any ❌ → the phase goes back to its owner agent.
+- **Returns:** test-report path + Gate 1/Gate 2 status + per-phase gate verdicts. Unit tests remain the owner agents' duty (written alongside code); the Tester verifies coverage targets are actually met.
+
+### Claude Code wiring (when run outside Cowork)
+
+Define custom agents in `.claude/agents/`, each listing this skill explicitly — sub-agents never inherit it:
+
+```markdown
+---
+name: sopify-backend-engineer
+description: "Builds GS Battery PostgreSQL schemas and Express/TypeScript APIs to SOP-DEV-001. Use for any database or API task."
+tools: Bash, Glob, Grep, Read, Write, Edit, Skill
+skills: sopify-sdlc
+---
+You are the Backend Engineer worker. Follow Phase 3 and Phase 4 of sopify-sdlc exactly.
+Read docs/requirements.md before designing; stop for schema approval before writing SQL.
+Return: files written + the phase quality gate checklists.
+```
+
+Create `sopify-pm`, `sopify-uxui-design`, `sopify-frontend-engineer`, and `sopify-tester` the same way (tester: read-only on others' code — `Bash, Glob, Grep, Read` plus `Write` limited to `__tests__/` and `docs/test-report.md`). The orchestrator (main session) delegates one phase at a time and writes the ledger.
+
+### Anti-"lost in the middle" checklist (orchestrator, every delegation)
+
+✅ phase SOP slice copied verbatim into the worker prompt · ✅ upstream artifacts passed as paths, not pasted · ✅ ledger re-read from disk before delegating · ✅ worker reply ≤ ~30 lines, artifacts on disk · ✅ Tester verified the gate against files and the result is recorded · ✅ user approval captured in the ledger for requirements & schema · ✅ if the main session grows long, re-read this skill's relevant section before acting — never act from memory of it.
 
 ## The SDLC journey (do not skip phases)
 
@@ -357,29 +439,20 @@ Senior always reviews: logic + edge cases, security (SQL injection, exposed secr
 
 ---
 
-## Phase 5 — Deploy
+## Phase 5 — Deploy (Railway, auto-deploy from `main`)
 
-### Pre-deploy checklist (Railway path)
+### Pre-deploy checklist
 
 Build must pass **locally** first (`npm run build` for both apps — if it fails locally it fails on Railway). No TypeScript errors (`tsc --noEmit`). `typescript` must be in `dependencies` (not `devDependencies`) so the platform can build. Backend exposes `GET /api/health` returning `{ status: "ok" }`. Config files present: `railway.toml`, `nixpacks.toml`, correct `package.json` scripts (`build`, `start`). Credentials ready: Supabase URL + anon key + service key, and a freshly generated production JWT secret (`openssl rand -base64 32` — never reuse the dev value). Latest code pushed to GitHub. Never commit `.env`. After deploy: run smoke tests + post-deploy verification.
 
-### AWS path (EC2 + RDS + S3 + CloudFront + WAF)
-
-Architecture: `User → WAF → CloudFront (CDN + SSL) → EC2 (Node + Nginx + PM2, public subnet) → RDS (PostgreSQL, private subnet)`, with S3 for file storage. Name every resource `p-<project>-<resource-type>` (e.g. `p-siamgs-kaizen-ec2`).
-
 Security baseline:
 
-- **Secrets Manager** for DB credentials / API keys — never hardcode.
-- **KMS** to encrypt S3 + RDS; grant only the IAM roles that need it.
-- **ACM** for free SSL/TLS — request the CloudFront certificate in **us-east-1** specifically.
-- **RDS** in a private subnet, encrypted, not publicly reachable.
-- **WAF** rules for OWASP categories + rate limiting.
-- **CloudWatch** dashboards + alarms (EC2 CPU/memory, RDS connections), **CloudTrail** for audit logging, **Cost Explorer** budget alerts.
-- CI/CD via GitHub Actions + SSM, blue-green deployment.
+- All DB credentials / API keys live in **Railway environment variables** — never hardcoded, never committed.
+- CI/CD: Railway connects to the GitHub repo and **auto-deploys from the `main` branch** — `main` stays protected (PR + CI only), so whatever lands there is production.
 
 ### Go-live gate (Phase 5)
 
-✅ build green locally + CI · ✅ health check responds · ✅ prod secrets set, none committed · ✅ HTTPS/SSL active · ✅ DB private + encrypted + backed up · ✅ WAF + rate limiting on · ✅ monitoring/alarms + budget alerts on · ✅ smoke + post-deploy verification passed · ✅ Release Gate 2 (Phase 6) passed.
+✅ build green locally + CI · ✅ health check responds · ✅ prod secrets set in Railway env, none committed · ✅ HTTPS active on the Railway domain · ✅ Supabase DB backed up + RLS policies on · ✅ smoke + post-deploy verification passed · ✅ Release Gate 2 (Phase 6) passed.
 
 > Deep reference: Railway path → `ref/05_DEPLOY/` (5.2 Pre_Deploy_Checklist, 5.3 Environment_Variables, 5.4 Deploy_Steps, 5.5 Post_Deploy_Verification, 5.6 Troubleshooting). AWS path → `ref/08_AWS/` (8.0 → 8.7 step-by-step, 8.8 Go_Live_Checklist).
 
@@ -388,22 +461,26 @@ Security baseline:
 ## DO
 
 - Move phase by phase; pass each gate before the next; get user approval on the requirements and schema documents before downstream work.
+- **Delegate each phase to its owner agent** (PM, UXUI Design, Frontend Engineer, Backend Engineer) with the phase's SOP slice in the prompt; run the **Tester** to verify the gate before marking any phase final.
+- Keep the orchestrator lean: artifacts on disk, compact worker reports, phase-state ledger in `docs/PHASE_STATE.md` re-read before every decision.
 - Enforce DoR before starting a task and DoD before merging.
 - Validate every request with Zod; return the one standard response shape.
 - Give every table a PK + `created_at`/`updated_at` + trigger; index foreign keys; declare ON DELETE on every FK.
 - Write tests alongside code; meet coverage targets; keep CI green.
 - Branch off `develop`, commit with Conventional Commits, open a PR linked to Asana, and get a senior approval.
-- Build locally before deploying; keep secrets in env / Secrets Manager; verify after deploy.
+- Build locally before deploying; keep secrets in Railway environment variables; verify after deploy.
 
 ## DO NOT
 
 - **Skip a phase gate** or build on an unapproved upstream artifact.
+- **Run multiple phases in one bloated context** — delegate to the owner agents; never paste full artifacts between agents (pass paths); never act on a remembered rule when the file can be re-read.
+- **Let an agent work outside its phase, self-approve a gated artifact, or mark its own gate as final** — gate verdicts come from the Tester only.
 - **Use `any`**, inline styles, or class components.
 - **Echo internal `err.message`** in unhandled 5xx responses, or put business logic in controllers.
 - **Interpolate strings into SQL** — parameterize. **Hardcode or commit secrets** — ever.
 - **Push straight to `main`/`develop`**, force-push protected branches, or merge with open MUST comments / failing CI.
 - **Ignore a failing test** or deploy before Release Gate 2 passes.
-- **Reuse dev JWT secrets in production** or expose the Supabase `service_role` key / RDS publicly.
+- **Reuse dev JWT secrets in production** or expose the Supabase `service_role` key publicly.
 
 ## Overall quality gate before declaring the project "done"
 
@@ -413,4 +490,5 @@ Security baseline:
 4. ✅ Code passes the per-endpoint gate; strict TS, MVC-layered, validated, standard response shape.
 5. ✅ Testing Gate 1 (every PR) and Gate 2 (pre-release) both passed; coverage targets met.
 6. ✅ Every change shipped via a reviewed, Asana-linked PR with Conventional Commits.
-7. ✅ Deploy go-live gate passed; secrets, SSL, WAF, backups, and monitoring all in place.
+7. ✅ Deploy go-live gate passed; Railway auto-deploy from `main` live, secrets in Railway env, SSL active, Supabase backups + RLS in place.
+8. ✅ Every phase was produced by its owner agent, its gate verified by the Tester, and recorded ✅ in `docs/PHASE_STATE.md`.
