@@ -1,121 +1,121 @@
-# Risk Management — Sopify AI-Assisted SDLC
+# การบริหารความเสี่ยง — Sopify AI-Assisted SDLC
 
 | | |
 |---|---|
 | **Document ID** | RISK-SDLC-001 |
-| **Version** | 1.0.0 |
-| **Date** | 2026-06-11 |
-| **Status** | Final |
-| **Owner** | Thapharan Vitayasiripaiboon (RD) |
+| **Version** | 1.1.0 |
+| **วันที่** | 2026-06-11 |
+| **สถานะ** | Final |
+| **ผู้รับผิดชอบ** | ฐาภรัญ วิทยาศิริไพบูลย์ (RD) |
 | **Asana** | [Docs : Risking](https://app.asana.com/1/1201761273978832/project/1214825140218161/task/1215605704341632) |
-| **Applies to** | All projects run under the `sopify-sdlc` skill (SOP-SDLC, Code Standard SOP-DEV-001) |
-| **Rendered PDF** | `docs/RISK_MANAGEMENT.pdf` (same content, brand-styled) |
+| **ขอบเขตการใช้** | ทุกโปรเจกต์ที่ดำเนินการภายใต้ skill `sopify-sdlc` (SOP-SDLC, Code Standard SOP-DEV-001) |
+| **Rendered PDF** | `docs/RISK_MANAGEMENT.pdf` (เนื้อหาเดียวกัน จัดรูปแบบตาม brand) |
 
 ---
 
-## 1. Purpose and Scope
+## 1. วัตถุประสงค์และขอบเขต
 
-This document defines how risk is identified, assessed, controlled, and escalated across the Sopify AI-assisted software development life cycle, in which a non-developer user builds and ships GS Battery internal web applications through Claude Cowork, GitHub, Supabase, and Railway.
+เอกสารนี้กำหนดวิธีการระบุ ประเมิน ควบคุม และยกระดับ (escalate) ความเสี่ยงตลอดวงจรการพัฒนาซอฟต์แวร์แบบใช้ AI ช่วย (Sopify AI-assisted SDLC) ซึ่งผู้ใช้ที่ไม่ใช่นักพัฒนา (non-developer) สร้างและส่งมอบเว็บแอปพลิเคชันภายในของ GS Battery ผ่าน Claude Cowork, GitHub, Supabase และ Railway
 
-It covers the full SOP-SDLC journey — Requirements, Design, Database, Development, Testing, Deploy, and the cross-cutting Git Workflow — and the multi-agent operating model (PM, UXUI Design, Frontend Engineer, Backend Engineer, Tester). It applies to every project that runs under the `sopify-sdlc` skill.
+ครอบคลุมทุกเฟสของ SOP-SDLC — Requirements, Design, Database, Development, Testing, Deploy และ Git Workflow ที่พาดผ่านทุกเฟส — รวมถึงรูปแบบการทำงานแบบ multi-agent (PM, UXUI Design, Frontend Engineer, Backend Engineer, Tester) และบังคับใช้กับทุกโปรเจกต์ที่ดำเนินการภายใต้ skill `sopify-sdlc`
 
-Out of scope: enterprise-level IT risk (network, endpoints, physical security), which is owned by GS Battery IT under separate policy.
+นอกขอบเขต: ความเสี่ยงด้าน IT ระดับองค์กร (เครือข่าย, อุปกรณ์ปลายทาง, ความปลอดภัยทางกายภาพ) ซึ่งอยู่ในความรับผิดชอบของฝ่าย IT ของ GS Battery ตามนโยบายแยกต่างหาก
 
-## 2. Methodology — 5x5 Likelihood x Impact
+## 2. วิธีการประเมิน — 5x5 โอกาสเกิด x ผลกระทบ
 
-Each risk is scored as **Risk Score = Likelihood (L) x Impact (I)**, each rated 1–5.
+ความเสี่ยงแต่ละรายการให้คะแนนเป็น **Risk Score = โอกาสเกิด (L) x ผลกระทบ (I)** โดยแต่ละด้านให้คะแนน 1–5
 
-### Likelihood
+### โอกาสเกิด (Likelihood)
 
-| Rating | Label | Meaning |
+| ระดับ | ชื่อเรียก | ความหมาย |
 |---|---|---|
-| 1 | Rare | Hardly conceivable in a normal project run |
-| 2 | Unlikely | Could occur in exceptional circumstances |
-| 3 | Possible | Could occur in some project runs |
-| 4 | Likely | Expected to occur in most runs without controls |
-| 5 | Almost certain | Will occur without controls |
+| 1 | แทบไม่เกิด (Rare) | แทบเป็นไปไม่ได้ในการทำโปรเจกต์ปกติ |
+| 2 | ไม่น่าเกิด (Unlikely) | อาจเกิดได้ในสถานการณ์พิเศษเท่านั้น |
+| 3 | เป็นไปได้ (Possible) | อาจเกิดขึ้นในบางโปรเจกต์ |
+| 4 | น่าจะเกิด (Likely) | คาดว่าจะเกิดในโปรเจกต์ส่วนใหญ่หากไม่มีการควบคุม |
+| 5 | เกิดแน่นอน (Almost certain) | จะเกิดขึ้นแน่นอนหากไม่มีการควบคุม |
 
-### Impact
+### ผลกระทบ (Impact)
 
-| Rating | Label | Meaning |
+| ระดับ | ชื่อเรียก | ความหมาย |
 |---|---|---|
-| 1 | Negligible | Cosmetic; no rework, no data or security effect |
-| 2 | Minor | Small rework inside one phase |
-| 3 | Moderate | Rework across phases, or schedule slip |
-| 4 | Major | Production defect, outage, or significant rework |
-| 5 | Severe | Data breach, data loss, or security incident |
+| 1 | เล็กน้อยมาก (Negligible) | ผลกระทบผิวเผิน ไม่มีงานแก้ ไม่มีผลต่อข้อมูลหรือความปลอดภัย |
+| 2 | เล็กน้อย (Minor) | งานแก้เล็กน้อยภายในเฟสเดียว |
+| 3 | ปานกลาง (Moderate) | งานแก้ข้ามเฟส หรือกระทบกำหนดการ |
+| 4 | รุนแรง (Major) | เกิด defect ใน production, ระบบล่ม หรืองานแก้จำนวนมาก |
+| 5 | รุนแรงมาก (Severe) | ข้อมูลรั่วไหล ข้อมูลสูญหาย หรือเหตุการณ์ด้านความปลอดภัย |
 
-### Risk level bands
+### ระดับความเสี่ยง (Risk level bands)
 
-| Score | Level | Required response |
+| คะแนน | ระดับ | การตอบสนองที่ต้องทำ |
 |---|---|---|
-| 15–25 | **High** | Mitigation mandatory and verified at a gate; escalate on occurrence |
-| 8–12 | **Medium** | Mitigation required; monitored at phase gates |
-| 1–6 | **Low** | Accept with standard controls; review each cycle |
+| 15–25 | **สูง (High)** | ต้องมี mitigation และตรวจสอบยืนยันที่ gate เสมอ; ยกระดับทันทีเมื่อเกิดเหตุ |
+| 8–12 | **กลาง (Medium)** | ต้องมี mitigation; ติดตามที่ phase gate |
+| 1–6 | **ต่ำ (Low)** | ยอมรับได้ภายใต้การควบคุมมาตรฐาน; ทบทวนทุกรอบ |
 
-The register is reviewed at every phase-gate decision and re-baselined at project kick-off and before each release (Release Gate 2).
+ทะเบียนความเสี่ยงต้องถูกทบทวนทุกครั้งที่ตัดสิน phase gate และปรับฐานใหม่ (re-baseline) เมื่อเริ่มโปรเจกต์และก่อนปล่อยแต่ละ release (Release Gate 2)
 
-## 3. Risk Register
+## 3. ทะเบียนความเสี่ยง (Risk Register)
 
-14 identified risks. L = Likelihood, I = Impact, S = Score.
+ความเสี่ยงที่ระบุได้ 14 รายการ — L = โอกาสเกิด, I = ผลกระทบ, S = คะแนน
 
-### High risks (score 15–25)
+### ความเสี่ยงระดับสูง (คะแนน 15–25)
 
-| ID | Risk | L | I | S | Owner | Mitigation |
+| ID | ความเสี่ยง | L | I | S | ผู้รับผิดชอบ | Mitigation |
 |---|---|---|---|---|---|---|
-| R-01 | **Secret leakage** — Supabase service key, JWT secret, or `.env` committed to the repo or pasted into context/chat | 4 | 5 | 20 | IT + User (orchestrator) | Secrets live only in env vars / Railway variables; `.env` never committed (`.env.example` only); tokens delivered by IT over a secure channel; reviewer greps for secrets at every PR; on exposure run the key-rotation procedure (Section 5) immediately |
-| R-02 | **Phase-gate skipping** — downstream work starts on an unapproved upstream artifact (free non-linear navigation does not waive gates) | 4 | 4 | 16 | User (orchestrator) | Gate is the single completeness check before Push; Tester independently verifies every gate against files; `docs/PHASE_STATE.md` ledger re-read from disk before any delegation or gate decision; a worker's own pass is never sufficient |
-| R-03 | **Unapproved schema changes** — SQL written or applied before the schema document is approved | 3 | 5 | 15 | Backend Engineer agent | Schema doc first, SQL second — Backend agent must stop for user approval via the orchestrator; approval recorded in the ledger; migrations only via Supabase MCP with UP/DOWN tested |
-| R-04 | **AI-hallucinated requirements** — agent invents stories, AC, or scope the user never asked for; downstream phases build on them | 4 | 4 | 16 | PM agent + User | MoSCoW + user stories + AC produced by the PM agent from the user's raw brief only; user approves `docs/requirements.md` before design/database start; AC become the UAT scenarios so invented scope surfaces at Gate 2 |
-| R-05 | **Untested AI-generated code merged** — generated code passes superficial review but has no tests or hidden defects | 4 | 4 | 16 | Tester agent + Senior reviewer | Tests written alongside code (FE >= 70%, BE >= 80% coverage); Gate 1 on every PR (lint, type-check, tests, no debug code); Gate 2 before release (integration 100% of endpoints, k6 P95 < 2s, OWASP scan 0 critical); senior review with MUST/SHOULD/NIT labels |
+| R-01 | **การรั่วไหลของ secret** — Supabase service key, JWT secret หรือ `.env` ถูก commit ลง repo หรือถูกวางใน context/แชต | 4 | 5 | 20 | IT + User (orchestrator) | เก็บ secret ใน env vars / Railway variables เท่านั้น; ห้าม commit `.env` (ใช้ `.env.example` เท่านั้น); IT ส่ง token ผ่านช่องทางที่ปลอดภัย; reviewer ตรวจหา secret ทุก PR; หากรั่วไหลให้ทำขั้นตอนหมุนเวียนกุญแจ (key rotation) ตามหัวข้อ 5 ทันที |
+| R-02 | **การข้าม phase gate** — เริ่มงาน downstream บน artifact ต้นทางที่ยังไม่ผ่านการอนุมัติ (การทำงานแบบ non-linear ไม่ได้ยกเว้น gate) | 4 | 4 | 16 | User (orchestrator) | Gate คือจุดตรวจความครบถ้วนเดียวก่อน Push; Tester ตรวจยืนยันทุก gate กับไฟล์จริงอย่างอิสระ; อ่าน ledger `docs/PHASE_STATE.md` จากดิสก์ก่อนการมอบหมายหรือตัดสิน gate ทุกครั้ง; ผลผ่านที่ worker รายงานเองไม่เพียงพอ |
+| R-03 | **การแก้ schema โดยไม่ได้รับอนุมัติ** — เขียนหรือรัน SQL ก่อนที่เอกสาร schema จะผ่านการอนุมัติ | 3 | 5 | 15 | Backend Engineer agent | เอกสาร schema มาก่อน SQL เสมอ — Backend agent ต้องหยุดรอการอนุมัติจาก user ผ่าน orchestrator; บันทึกการอนุมัติลง ledger; ทำ migration ผ่าน Supabase MCP เท่านั้น พร้อมทดสอบ UP/DOWN |
+| R-04 | **AI สร้าง requirement เกินจริง (hallucination)** — agent แต่ง story, AC หรือขอบเขตที่ user ไม่เคยขอ แล้วเฟสถัดไปสร้างงานต่อจากสิ่งนั้น | 4 | 4 | 16 | PM agent + User | MoSCoW + user stories + AC ต้องมาจาก brief ของ user เท่านั้น; user อนุมัติ `docs/requirements.md` ก่อนเริ่ม design/database; AC ถูกใช้เป็น UAT scenario ทำให้ขอบเขตที่ถูกแต่งขึ้นถูกจับได้ที่ Gate 2 |
+| R-05 | **โค้ดที่ AI สร้างถูก merge โดยไม่มีการทดสอบ** — โค้ดผ่านการรีวิวแบบผิวเผินแต่ไม่มีเทสต์หรือมี defect ซ่อนอยู่ | 4 | 4 | 16 | Tester agent + Senior reviewer | เขียนเทสต์คู่กับโค้ด (coverage FE >= 70%, BE >= 80%); Gate 1 ทุก PR (lint, type-check, tests, ไม่มี debug code); Gate 2 ก่อน release (integration ครบ 100% ของ endpoint, k6 P95 < 2s, OWASP scan 0 critical); senior review พร้อม label MUST/SHOULD/NIT |
 
-### Medium risks (score 8–12)
+### ความเสี่ยงระดับกลาง (คะแนน 8–12)
 
-| ID | Risk | L | I | S | Owner | Mitigation |
+| ID | ความเสี่ยง | L | I | S | ผู้รับผิดชอบ | Mitigation |
 |---|---|---|---|---|---|---|
-| R-06 | **Context drift ("lost in the middle")** — SOP rules silently dropped in long sessions | 3 | 3 | 9 | User (orchestrator) | Multi-agent pattern: one phase = one fresh sub-agent receiving its SOP slice verbatim; artifacts passed as file paths, never pasted; ledger on disk is the source of truth |
-| R-08 | **Migration without tested rollback** — schema change applied with no working DOWN path | 3 | 4 | 12 | Backend Engineer agent | Every migration has UP and commented DOWN; both tested against an empty DB before production; one logical change per migration; schema changelog maintained |
-| R-09 | **RLS missing on multi-tenant tables** — data visible across tenants/users | 2 | 5 | 10 | Backend Engineer agent + IT | Phase 3 gate checks RLS policies; parameterized queries only; app DB user granted least privilege; go-live gate re-verifies RLS before deploy |
-| R-07 | **Direct push to protected branches** — work bypasses PR, review, and CI | 2 | 4 | 8 | IT (repo admin) | Branch protection on `main` and `develop` (PR + passing CI + approval required, no force-push); all work on `<type>/<asana-id>-<desc>` branches; Railway deploys only from `main`, so nothing unreviewed reaches production |
-| R-10 | **Dependency vulnerabilities** — known CVEs in npm packages reach production | 3 | 3 | 9 | Senior reviewer + IT | Dependencies checklist at project init; lockfiles committed; OWASP scan at Gate 2 with 0 critical findings; audit step in CI template |
-| R-11 | **Traceability loss** — work not linkable Asana - branch - PR - deploy | 3 | 3 | 9 | PM agent + User | Branch names carry the Asana task ID; every PR description links the Asana task (DoD item); Conventional Commits; ledger rows carry artifact paths and dates |
+| R-06 | **Context drift ("lost in the middle")** — กฎ SOP ถูกละทิ้งเงียบ ๆ ใน session ที่ยาว | 3 | 3 | 9 | User (orchestrator) | รูปแบบ multi-agent: หนึ่งเฟส = sub-agent ใหม่หนึ่งตัวที่ได้รับ SOP slice ของเฟสนั้นแบบคำต่อคำ; ส่ง artifact เป็น path ของไฟล์ ไม่วางเนื้อหายาว; ledger บนดิสก์คือแหล่งความจริงเดียว |
+| R-08 | **Migration ที่ไม่มี rollback ที่ทดสอบแล้ว** — แก้ schema โดยไม่มี DOWN path ที่ใช้งานได้ | 3 | 4 | 12 | Backend Engineer agent | ทุก migration ต้องมี UP และ DOWN (comment ไว้); ทดสอบทั้งคู่กับ DB เปล่าก่อนขึ้น production; หนึ่ง migration ต่อหนึ่งการเปลี่ยนแปลงเชิงตรรกะ; ดูแล schema changelog |
+| R-09 | **ไม่มี RLS บนตาราง multi-tenant** — ข้อมูลมองเห็นข้าม tenant/user | 2 | 5 | 10 | Backend Engineer agent + IT | Phase 3 gate ตรวจ RLS policy; ใช้ parameterized query เท่านั้น; DB user ของแอปได้สิทธิ์น้อยที่สุด (least privilege); go-live gate ตรวจ RLS ซ้ำก่อน deploy |
+| R-07 | **Push ตรงเข้า protected branch** — งานข้าม PR, review และ CI | 2 | 4 | 8 | IT (repo admin) | Branch protection บน `main` และ `develop` (ต้องมี PR + CI ผ่าน + approval, ห้าม force-push); งานทั้งหมดอยู่บน branch `<type>/<asana-id>-<desc>`; Railway deploy จาก `main` เท่านั้น งานที่ไม่ผ่านรีวิวจึงไปไม่ถึง production |
+| R-10 | **ช่องโหว่ใน dependency** — CVE ที่รู้จักใน npm package หลุดไปถึง production | 3 | 3 | 9 | Senior reviewer + IT | ตรวจ dependencies checklist ตอนเริ่มโปรเจกต์; commit lockfile; OWASP scan ที่ Gate 2 ต้อง 0 critical; มี audit step ใน CI template |
+| R-11 | **ตามรอยงานไม่ได้ (traceability loss)** — เชื่อมโยง Asana - branch - PR - deploy ไม่ได้ | 3 | 3 | 9 | PM agent + User | ชื่อ branch มี Asana task ID; ทุก PR ใส่ลิงก์ Asana task ใน description (เป็นข้อ DoD); ใช้ Conventional Commits; แถวใน ledger บันทึก path ของ artifact และวันที่ |
 
-### Low risks (score 1–6)
+### ความเสี่ยงระดับต่ำ (คะแนน 1–6)
 
-| ID | Risk | L | I | S | Owner | Mitigation |
+| ID | ความเสี่ยง | L | I | S | ผู้รับผิดชอบ | Mitigation |
 |---|---|---|---|---|---|---|
-| R-12 | **Brand / accessibility non-compliance** — UI drifts from the brand guideline or fails keyboard access | 2 | 2 | 4 | UXUI Design agent | Phase 2 gate: tokens match the guideline, 375px holds, Tab/Enter works, async states present; Figma Make prompts always state the brand guideline |
-| R-13 | **Deploy failure / downtime on Railway** — bad build or config reaches production | 2 | 3 | 6 | IT + User | Pre-deploy checklist (local build green, `tsc --noEmit`, health check endpoint); smoke tests + post-deploy verification; Railway rollback to previous deploy if verification fails |
-| R-14 | **Knowledge concentration** — a single non-dev operator holds all project context | 2 | 3 | 6 | PM agent + RD lead | All artifacts and state live in the repo (`docs/`, `design/`, migrations, `docs/PHASE_STATE.md`), not in chat history; any session can resume from the repo; SOP skill is versioned and self-contained |
+| R-12 | **ไม่เป็นไปตาม brand / accessibility** — UI เพี้ยนจาก brand guideline หรือใช้คีย์บอร์ดไม่ได้ | 2 | 2 | 4 | UXUI Design agent | Phase 2 gate: token ตรงตาม guideline, layout 375px ไม่พัง, Tab/Enter ใช้งานได้, มี async state ครบ; prompt ของ Figma Make ต้องระบุ brand guideline เสมอ |
+| R-13 | **Deploy ล้มเหลว / ระบบล่มบน Railway** — build หรือ config ที่ผิดพลาดไปถึง production | 2 | 3 | 6 | IT + User | Pre-deploy checklist (build ผ่านบนเครื่อง, `tsc --noEmit`, มี health check endpoint); smoke test + ตรวจสอบหลัง deploy; ถ้าไม่ผ่านให้ Railway rollback กลับ deploy ก่อนหน้า |
+| R-14 | **ความรู้กระจุกตัว** — ผู้ปฏิบัติงาน non-dev คนเดียวถือ context ของโปรเจกต์ทั้งหมด | 2 | 3 | 6 | PM agent + RD lead | Artifact และสถานะทั้งหมดอยู่ใน repo (`docs/`, `design/`, migrations, `docs/PHASE_STATE.md`) ไม่ใช่ในประวัติแชต; session ใดก็เริ่มงานต่อจาก repo ได้; SOP skill มี version และครบถ้วนในตัวเอง |
 
-## 4. Gate-Embedded Controls Mapping
+## 4. การฝังการควบคุมไว้ใน Quality Gate
 
-Risk controls are not a separate audit layer — they are embedded in the SOP's existing quality gates. Skipping a gate therefore removes a control (see R-02).
+การควบคุมความเสี่ยงไม่ใช่ชั้นตรวจสอบที่แยกออกมา — แต่ฝังอยู่ใน quality gate เดิมของ SOP การข้าม gate จึงเท่ากับถอดการควบคุมออก (ดู R-02)
 
-| SOP control point | Controls risks |
+| จุดควบคุมตาม SOP | ควบคุมความเสี่ยง |
 |---|---|
-| Phase 1 gate — MoSCoW, AC per story, NFRs, user approval of requirements | R-04, R-11 |
-| Phase 2 gate — brand tokens, responsive, accessibility, async states | R-12 |
-| Phase 3 gate — schema doc approved before SQL; UP/DOWN tested; RLS; constraints | R-03, R-08, R-09 |
-| Phase 4 gate — Zod everywhere, no `any`, no secrets, standard response shape | R-01, R-05 |
-| Phase 6 Gate 1 (every PR) — lint, type-check, unit tests, coverage, no debug code | R-05 |
-| Phase 6 Gate 2 (pre-release) — integration 100%, k6 P95 < 2s, OWASP 0 critical, UAT sign-off | R-04, R-05, R-10, R-12 |
-| Phase 7 — branch protection, PR template + Asana link, senior review, Conventional Commits | R-01, R-02, R-07, R-11 |
-| Phase 5 go-live gate — secrets in Railway env, HTTPS, backups + RLS, smoke tests | R-01, R-09, R-13 |
-| `docs/PHASE_STATE.md` ledger + Tester gate verification | R-02, R-06, R-14 |
+| Phase 1 gate — MoSCoW, AC ทุก story, NFRs, user อนุมัติ requirements | R-04, R-11 |
+| Phase 2 gate — brand token, responsive, accessibility, async states | R-12 |
+| Phase 3 gate — schema doc อนุมัติก่อน SQL; ทดสอบ UP/DOWN; RLS; constraints | R-03, R-08, R-09 |
+| Phase 4 gate — Zod ครบทุกจุด, ไม่มี `any`, ไม่มี secret, response shape มาตรฐาน | R-01, R-05 |
+| Phase 6 Gate 1 (ทุก PR) — lint, type-check, unit tests, coverage, ไม่มี debug code | R-05 |
+| Phase 6 Gate 2 (ก่อน release) — integration 100%, k6 P95 < 2s, OWASP 0 critical, UAT sign-off | R-04, R-05, R-10, R-12 |
+| Phase 7 — branch protection, PR template + ลิงก์ Asana, senior review, Conventional Commits | R-01, R-02, R-07, R-11 |
+| Phase 5 go-live gate — secret ใน Railway env, HTTPS, backups + RLS, smoke tests | R-01, R-09, R-13 |
+| Ledger `docs/PHASE_STATE.md` + การตรวจยืนยัน gate โดย Tester | R-02, R-06, R-14 |
 
-## 5. Escalation Path
+## 5. เส้นทางการยกระดับปัญหา (Escalation Path)
 
-1. **Low** — record in the register at the next gate review; standard controls apply.
-2. **Medium** — phase owner pauses the affected work item, applies the mitigation, and the Tester re-verifies the gate before work resumes. PM informed at the next status update.
-3. **High** — stop the affected phase immediately. Notify the PM and IT the same day. Work does not resume until the Tester re-verifies the relevant gate and the resolution is recorded in `docs/PHASE_STATE.md` and on the Asana task.
-4. **Secret exposure (R-01) — immediate, regardless of band:**
-   - Stop all pushes and deploys.
-   - IT **rotates the exposed keys at once**: regenerate Supabase anon/service keys, regenerate the production JWT secret (`openssl rand -base64 32` — never reuse the dev value), update Railway environment variables.
-   - Purge the secret from git history (rewrite or revoke; a deleted file is not a removed secret).
-   - Verify the app on the rotated keys, run smoke tests, then resume.
-   - Log the incident as an Asana task linked to the project with cause and resolution.
+1. **ต่ำ (Low)** — บันทึกลงทะเบียนความเสี่ยงในการทบทวน gate ครั้งถัดไป; ใช้การควบคุมมาตรฐาน
+2. **กลาง (Medium)** — เจ้าของเฟสพักงานชิ้นที่ได้รับผลกระทบ ดำเนินการ mitigation แล้วให้ Tester ตรวจยืนยัน gate ใหม่ก่อนกลับมาทำงานต่อ; แจ้ง PM ในการอัปเดตสถานะรอบถัดไป
+3. **สูง (High)** — หยุดเฟสที่ได้รับผลกระทบทันที แจ้ง PM และ IT ภายในวันเดียวกัน; ห้ามกลับมาทำงานต่อจนกว่า Tester จะตรวจยืนยัน gate ที่เกี่ยวข้องใหม่ และบันทึกการแก้ไขลง `docs/PHASE_STATE.md` และ Asana task แล้ว
+4. **Secret รั่วไหล (R-01) — ดำเนินการทันทีไม่ว่าระดับใด:**
+   - หยุด push และ deploy ทั้งหมด
+   - IT **หมุนเวียนกุญแจที่รั่วทันที**: regenerate Supabase anon/service keys, regenerate production JWT secret (`openssl rand -base64 32` — ห้ามใช้ค่า dev ซ้ำ), อัปเดต Railway environment variables
+   - ล้าง secret ออกจาก git history (rewrite หรือ revoke; การลบไฟล์ไม่ได้แปลว่า secret หายไป)
+   - ตรวจสอบแอปด้วยกุญแจชุดใหม่ รัน smoke test แล้วจึงกลับมาทำงานต่อ
+   - บันทึกเหตุการณ์เป็น Asana task ที่เชื่อมกับโปรเจกต์ พร้อมสาเหตุและการแก้ไข
 
-## 6. Review and Maintenance
+## 6. การทบทวนและบำรุงรักษา
 
-This register is a living document: review it at every phase-gate decision, after any incident, and before each release. Material changes ship via the standard git workflow — `docs/` branch, Conventional Commit, Asana-linked PR into `develop` — so the risk baseline is versioned with the code it protects.
+ทะเบียนความเสี่ยงนี้เป็นเอกสารที่มีชีวิต: ทบทวนทุกครั้งที่ตัดสิน phase gate, หลังเกิดเหตุการณ์ใด ๆ และก่อนปล่อยทุก release การแก้ไขที่มีนัยสำคัญต้องส่งผ่าน git workflow มาตรฐาน — branch `docs/`, Conventional Commit, PR ที่เชื่อมกับ Asana เข้าสู่ `develop` — เพื่อให้ฐานความเสี่ยงมี version คู่กับโค้ดที่มันปกป้อง
