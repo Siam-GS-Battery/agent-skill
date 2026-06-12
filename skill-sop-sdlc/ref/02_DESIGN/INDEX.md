@@ -8,8 +8,11 @@
 |:-----:|:-------|:---------|
 | 2.1 | [Wireframe with Figma Make](2.1_Wireframe_with_Figma_Make.md) | สร้าง Wireframe ด้วย Figma Make (AI) พร้อมตัวอย่าง Prompt |
 | 2.2 | [UI Design with Figma Make](2.2_UI_Design_with_Figma_Make.md) | สร้าง UI Design พร้อม Brand Guideline และ Export ไป GitHub |
+| ★ | [Style Apple](Style_Apple.md) | สไตล์การออกแบบ UI แบบ Apple (design tokens, typography, components) — **ให้อ่านก่อนสร้าง UI ทุกครั้ง** |
 
 ## ลำดับการอ่านแนะนำ
+
+> **สำคัญ:** อ่าน **[Style Apple](Style_Apple.md)** ก่อนสร้าง UI ทุกครั้ง
 
 1. เริ่มจาก **Wireframe with Figma Make** เพื่อสร้าง Wireframe ทีละหน้า
 2. ทำ **UI Design with Figma Make** ใส่สี, Font, Brand Guideline แล้ว Export
