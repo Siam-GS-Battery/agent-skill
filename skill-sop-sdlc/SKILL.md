@@ -72,13 +72,13 @@ all agents        → gate entries recorded by the orchestrator in docs/PHASE_ST
 
 #### 2. UXUI Design Agent — Phase 2 Design
 - **Delegate when:** requirements are approved and design starts, or any screen is added/changed.
-- **Prompt must include:** the entire *Phase 2 — Design* section (brand colors, IBM Plex Sans typography, spacing/radius/layout, breakpoints, component & accessibility rules) + path to `docs/requirements.md`.
+- **Prompt must include:** the entire *Phase 2 — Design* section (brand colors, IBM Plex Sans typography, spacing/radius/layout, breakpoints, component & accessibility rules) + path to `docs/requirements.md` + `ref/02_DESIGN/Style_Apple.md` (read in full before any UI is created — every time).
 - **Produces:** Figma Make prompts that state the brand guideline, wireframes/screens covering every story, exports (PNG @2x / SVG) committed under `design/` + design README with the Figma link, loading/empty/error states specified for every async surface.
 - **Returns:** paths + Phase 2 gate checklist (tokens match, 375px holds, Tab/Enter works, async states present).
 
 #### 3. Frontend Engineer Agent — frontend part of Phase 4
 - **Delegate when:** designs are gate-passed and the API spec exists, or any UI implementation changes.
-- **Prompt must include:** the React/TypeScript/Tailwind rules from *Phase 4 — Development* (naming, strict TS, React best practices, no inline styles) + paths to `docs/requirements.md`, `docs/api-spec.md`, and `design/`.
+- **Prompt must include:** the React/TypeScript/Tailwind rules from *Phase 4 — Development* (naming, strict TS, React best practices, no inline styles) + paths to `docs/requirements.md`, `docs/api-spec.md`, and `design/` + `ref/02_DESIGN/Style_Apple.md` (read before implementing any UI — every time).
 - **Produces:** `src/frontend/**` — components implementing the approved designs pixel-faithfully with brand tokens, mobile-first responsive, unit tests alongside code (FE coverage ≥ 70%).
 - **Returns:** file paths + Phase 4 FE gate checklist (no `any`, no inline styles, no `console.log`, tests green).
 
@@ -195,6 +195,8 @@ ALL of these must be true:
 
 Designs are produced with Figma Make (AI) and must always state the brand guideline in the prompt. Reuse these tokens — never invent new ones.
 
+**อ่านสไตล์ก่อนสร้าง UI ทุกครั้ง (binding).** Before creating or changing ANY UI — wireframe, Figma Make prompt, or frontend component — read `ref/02_DESIGN/Style_Apple.md` (Apple design style: photography-first layout, single Action Blue accent, SF Pro typography ladder, tile rhythm, one-shadow elevation) in full, every time, including when returning to UI work in a new session. UI work that starts without this read gets rejected at review.
+
 ### Brand colors
 
 | Role | Hex | Tailwind |
@@ -249,7 +251,7 @@ Desktop 1440px+ (full layout, 32px padding) · Tablet 768–1024px (24px padding
 
 ✅ colors/typography/spacing match the guideline · ✅ Tab + Enter/Space works · ✅ 375px layout doesn't break · ✅ loading/empty/error states present · ✅ no inline styles for class-expressible values · ✅ Figma exports + README committed.
 
-> Deep reference: `ref/02_DESIGN/2.1_Wireframe_with_Figma_Make.md` (wireframe prompts) and `2.2_UI_Design_with_Figma_Make.md` (full brand prompt + export-to-GitHub steps).
+> Deep reference: `ref/02_DESIGN/2.1_Wireframe_with_Figma_Make.md` (wireframe prompts) and `2.2_UI_Design_with_Figma_Make.md` (full brand prompt + export-to-GitHub steps) — and `Style_Apple.md` (Apple design style — **read before creating UI, every time**).
 
 ---
 
