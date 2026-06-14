@@ -26,7 +26,7 @@ The user types **`/sop`** to start. This skill is a **single hub** that links ev
 Brainstorm → Design (Frontend) → Backend (API) → Database → Test Cases → Push to Github. The order in between is flexible; the **Gate is the single completeness check** before pushing.
 
 ### Connections used per phase
-- **Database phase → Supabase:** when the user reaches Database, they ask IT to create a Supabase project; IT returns the **Token** (URL + anon key + service key) via a secure channel; the user connects it via the **Supabase MCP** in Cowork. After the schema doc is approved, the migrations are **applied to Supabase automatically via the Supabase MCP (`apply_migration`)** — no copy-paste into the SQL Editor. Never commit the token — keep it in env.
+- **Database phase → Supabase:** when the user reaches Database, they ask IT to create a Supabase project; IT returns the **Token** (URL + `service_role` key for the backend; anon key only if a frontend client calls Supabase directly) via a secure channel; the user connects it via the **Supabase MCP** in Cowork. After the schema doc is approved, the migrations are **applied to Supabase automatically via the Supabase MCP (`apply_migration`)** — no copy-paste into the SQL Editor. The backend connects with `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (server-only, bypasses RLS). Never commit the token — keep it in env.
 - **Push phase → Github:** push code to `SiamGS-Sopify` through the **Github Connection** (no zip handoff).
 
 ### Deploy loop — Railway
@@ -447,7 +447,7 @@ Senior always reviews: logic + edge cases, security (SQL injection, exposed secr
 
 ### Pre-deploy checklist
 
-Build must pass **locally** first (`npm run build` for both apps — if it fails locally it fails on Railway). No TypeScript errors (`tsc --noEmit`). `typescript` must be in `dependencies` (not `devDependencies`) so the platform can build. Backend exposes `GET /api/health` returning `{ status: "ok" }`. Config files present: `railway.toml`, `nixpacks.toml`, correct `package.json` scripts (`build`, `start`). Credentials ready: Supabase URL + anon key + service key, and a freshly generated production JWT secret (`openssl rand -base64 32` — never reuse the dev value). Latest code pushed to GitHub. Never commit `.env`. After deploy: run smoke tests + post-deploy verification.
+Build must pass **locally** first (`npm run build` for both apps — if it fails locally it fails on Railway). No TypeScript errors (`tsc --noEmit`). `typescript` must be in `dependencies` (not `devDependencies`) so the platform can build. Backend exposes `GET /api/health` returning `{ status: "ok" }`. Config files present: `railway.toml`, `nixpacks.toml`, correct `package.json` scripts (`build`, `start`). Credentials ready: Supabase URL + `service_role` key (backend connects with this; anon key only if a frontend client calls Supabase directly), and a freshly generated production JWT secret (`openssl rand -base64 32` — never reuse the dev value). Latest code pushed to GitHub. Never commit `.env`. After deploy: run smoke tests + post-deploy verification.
 
 Security baseline:
 
