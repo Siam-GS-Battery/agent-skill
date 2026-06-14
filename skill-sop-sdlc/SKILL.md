@@ -26,7 +26,7 @@ The user types **`/sop`** to start. This skill is a **single hub** that links ev
 Brainstorm → Design (Frontend) → Backend (API) → Database → Test Cases → Push to Github. The order in between is flexible; the **Gate is the single completeness check** before pushing.
 
 ### Connections used per phase
-- **Database phase → Supabase:** when the user reaches Database, they ask IT to create a Supabase project; IT returns the **Token** (URL + anon key + service key) via a secure channel; the user connects it via the **Supabase MCP** in Cowork, then runs schema/migrations. Never commit the token — keep it in env.
+- **Database phase → Supabase:** when the user reaches Database, they ask IT to create a Supabase project; IT returns the **Token** (URL + `service_role` key for the backend; anon key only if a frontend client calls Supabase directly) via a secure channel; the user connects it via the **Supabase MCP** in Cowork. After the schema doc is approved, the migrations are **applied to Supabase automatically via the Supabase MCP (`apply_migration`)** — no copy-paste into the SQL Editor. The backend connects with `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (server-only, bypasses RLS). Never commit the token — keep it in env.
 - **Push phase → Github:** push code to `SiamGS-Sopify` through the **Github Connection** (no zip handoff).
 
 ### Deploy loop — Railway
@@ -85,7 +85,7 @@ all agents        → gate entries recorded by the orchestrator in docs/PHASE_ST
 #### 4. Backend Engineer Agent — Phase 3 Database + backend part of Phase 4
 - **Delegate when:** requirements are approved and data/API design starts, or schema/endpoints change.
 - **Prompt must include:** the entire *Phase 3 — Database* and *Phase 4 — Development* backend sections (naming, required columns + trigger, constraints/indexes, migrations, RLS; MVC layering, error classes, Zod, standard response shape, security) + path to `docs/requirements.md`.
-- **Produces:** `docs/schema.md` FIRST (stop — user approval via orchestrator before any SQL), then `migrations/[timestamp]_*.sql` with UP/DOWN run via the Supabase MCP, then `docs/api-spec.md` and `src/backend/**` (Controller → Service → Repository, Zod on every body/query/params, auth middleware), unit tests alongside code (BE coverage ≥ 80%).
+- **Produces:** `docs/schema.md` FIRST (stop — user approval via orchestrator before any SQL), then `migrations/[timestamp]_*.sql` with UP/DOWN. **Once the orchestrator has recorded the user's schema approval** in `docs/PHASE_STATE.md`, the migrations are **applied to Supabase automatically via the Supabase MCP `apply_migration` tool** (one call per file, UP section only, in dependency order) as the final step of backend scaffold — not a manual SQL-Editor step. Then `docs/api-spec.md` and `src/backend/**` (Controller → Service → Repository, Zod on every body/query/params, auth middleware), unit tests alongside code (BE coverage ≥ 80%). **Gate (binding):** never call `apply_migration`/`execute_sql` DDL before that approval is recorded; destructive SQL (`DROP`/`TRUNCATE`/`ALTER … DROP`) is never auto-applied — it needs a separate approval.
 - **Returns:** paths + Phase 3 gate checklist + per-endpoint Phase 4 gate checklist + confirmation rollback was tested.
 
 #### 5. Tester Agent — Phase 6 Testing + gate verification for every phase
@@ -305,13 +305,15 @@ Index every foreign-key column, every unique natural key, columns frequently use
 
 Name files `[timestamp]_[description].sql` (e.g. `20250115_create_users_table.sql`), include an **UP** section and a commented **DOWN** (rollback) section, one logical change per migration, test against an empty DB and test the rollback before applying to production. Keep a schema changelog (version, date, description, file).
 
+Once the schema doc is approved, **apply migrations to Supabase automatically via the Supabase MCP `apply_migration`** (one file at a time, in dependency order) — use `apply_migration` for DDL so Supabase tracks migration history (`execute_sql` is for read-only verification only). Write DDL to be **idempotent / re-runnable** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`; guard ENUMs with a `DO $$ … EXCEPTION WHEN duplicate_object` block since `CREATE TYPE` has no `IF NOT EXISTS`). After applying, verify with `list_tables` / `list_migrations` / `get_advisors` (security + RLS lints). **Never auto-run destructive operations** (`DROP`/`TRUNCATE`/`ALTER … DROP COLUMN`/DOWN rollback) — those require a separate user approval each time.
+
 ### Row-Level Security & DB security
 
 Enable RLS on multi-tenant tables and write policies (e.g. users see only `is_active` rows; vendors update only their own). Use **parameterized queries only** (`$1, $2` — never string interpolation), hash passwords with **bcrypt** (saltRounds 10), keep credentials in environment variables, and grant the app DB user only the permissions it needs (revoke `CREATE` on schema public).
 
 ### Quality gate (Phase 3)
 
-✅ every table has PK + created_at/updated_at + trigger · ✅ FKs declare ON DELETE · ✅ indexes on FK + hot columns · ✅ unique + check constraints set · ✅ data dictionary written · ✅ migrations have UP/DOWN and were tested · ✅ backup/restore documented.
+✅ every table has PK + created_at/updated_at + trigger · ✅ FKs declare ON DELETE · ✅ indexes on FK + hot columns · ✅ unique + check constraints set · ✅ data dictionary written · ✅ migrations have UP/DOWN and were tested · ✅ migrations applied to Supabase via `apply_migration` **only after** schema approval recorded · ✅ tables verified via `list_tables`/`get_advisors` · ✅ backup/restore documented.
 
 > Deep reference: `ref/03_DATABASE/3.2_Database_Schema_Document.md` is the full schema-doc structure to reproduce; `3.3_Database_Migration_from_Figma_DataContext.md` walks the DataContext → Supabase migration end to end; `3.1_ERD_Diagram.md` for the relationship map.
 
@@ -445,7 +447,7 @@ Senior always reviews: logic + edge cases, security (SQL injection, exposed secr
 
 ### Pre-deploy checklist
 
-Build must pass **locally** first (`npm run build` for both apps — if it fails locally it fails on Railway). No TypeScript errors (`tsc --noEmit`). `typescript`, `tsx`, and build-time `@types/*` must be in `dependencies` (not `devDependencies`) — Railway sets `NODE_ENV=production` and skips devDependencies. Backend exposes `GET /api/health` returning `{ status: "ok" }`. Config files present: `railway.toml`, `nixpacks.toml` (Node 22 — `nodejs_22` + `engines.node` ≥ 22, required for Supabase's native WebSocket), `tsconfig.json` `lib` includes `"DOM"` + `skipLibCheck` when using `@supabase/*`, correct `package.json` scripts (`build`, `start`). After `git push`, verify `package.json`/`tsconfig.json`/`nixpacks.toml` on GitHub match local (sandbox mounts can truncate files mid-push). Credentials ready: Supabase URL + anon key + service key, and a freshly generated production JWT secret (`openssl rand -base64 32` — never reuse the dev value). Latest code pushed to GitHub. Never commit `.env`. After deploy: run smoke tests + post-deploy verification.
+Build must pass **locally** first (`npm run build` for both apps — if it fails locally it fails on Railway). No TypeScript errors (`tsc --noEmit`). `typescript`, `tsx`, and build-time `@types/*` must be in `dependencies` (not `devDependencies`) — Railway sets `NODE_ENV=production` and skips devDependencies. Backend exposes `GET /api/health` returning `{ status: "ok" }`. Config files present: `railway.toml`, `nixpacks.toml` (Node 22 — `nodejs_22` + `engines.node` ≥ 22, required for Supabase's native WebSocket), `tsconfig.json` `lib` includes `"DOM"` + `skipLibCheck` when using `@supabase/*`, correct `package.json` scripts (`build`, `start`). After `git push`, verify `package.json`/`tsconfig.json`/`nixpacks.toml` on GitHub match local (sandbox mounts can truncate files mid-push). Credentials ready: Supabase URL + `service_role` key (backend connects with this; anon key only if a frontend client calls Supabase directly), and a freshly generated production JWT secret (`openssl rand -base64 32` — never reuse the dev value). Latest code pushed to GitHub. Never commit `.env`. After deploy: run smoke tests + post-deploy verification.
 
 Security baseline:
 
