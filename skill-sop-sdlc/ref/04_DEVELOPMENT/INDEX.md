@@ -24,6 +24,7 @@ AC (Acceptance Criteria)
 | 4.3 | [Database from DataContext](4.3_Database_Design.md) | Claude อ่าน DataContext → สร้าง SQL Schema |
 | 4.4 | [Backend Development](4.4_Backend_Project.md) | สร้าง Backend API ด้วย Claude Code |
 | 4.5 | [Frontend Integration](4.5_Frontend_Integration.md) | Claude Code เชื่อม Frontend จาก Mockup ไป Backend จริง |
+| 4.6 | [Local Preview](4.6_Local_Preview.md) | รันแอปบน local แล้วเปิดให้ user เห็น/อนุมัติ ก่อน Deploy |
 
 ## ลำดับการทำงาน
 
@@ -33,6 +34,7 @@ AC (Acceptance Criteria)
 4. **Database from DataContext** — ให้ Claude อ่าน DataContext แล้วสร้าง SQL
 5. **Backend Development** — ใช้ Claude Code สร้าง Backend API
 6. **Frontend Integration** — ใช้ Claude Code เปลี่ยนจาก mockup data ไปเชื่อม backend จริง
+7. **Local Preview** — รันแอปบนเครื่อง แล้วเปิดให้ user เห็นของจริงและอนุมัติ ก่อนไป Deploy
 
 ## Phase ก่อนหน้า / ถัดไป
 

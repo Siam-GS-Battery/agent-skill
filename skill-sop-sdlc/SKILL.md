@@ -2,7 +2,7 @@
 name: sopify-sdlc
 description: "GS Battery end-to-end SDLC SOP — one self-contained playbook for the whole lifecycle, from the team's SOP-SDLC docs. Covers requirements (MoSCoW, user stories, acceptance criteria, DoR/DoD), design (Figma Make brand guideline: colors, IBM Plex Sans typography, spacing, responsive), database (PostgreSQL schema, naming, constraints, indexes, triggers, migrations, RLS), development (Code Standard SOP-DEV-001: TypeScript strict, MVC layering, Zod validation, standard API response, security), testing (Vitest/Supertest/k6, coverage, quality gates), git workflow (branching, Conventional Commits, PR + review), and deploy (Railway auto-deploy from main). The full SOP with templates and examples lives in the bundled ref/ folder. Includes a multi-agent pattern (PM, UXUI, Frontend, Backend, Tester) that delegates each phase to an isolated sub-agent so SOP rules are never lost mid-session. Apply at every phase; treat every rule as binding — work was rejected for skipping validation, tests, or pushing straight to main."
 metadata:
-  version: 1.3.0
+  version: 1.4.0
   hermes:
     tags: [gs-battery, sopify-vibe, sdlc, requirements, design, database, backend, testing, git, deploy, railway, supabase, react, typescript, postgresql, multi-agent]
 ---
@@ -23,7 +23,7 @@ Sopify is a **Working Procedure**, not an app. A Non-Dev User runs it inside Cla
 The user types **`/sop`** to start. This skill is a **single hub** that links every phase. It is **non-linear**: the user may enter any phase first and jump back and forth freely; the skill keeps each phase's state and artifacts. Free navigation does **not** waive the gates — a phase's output is only "final" once its quality gate passes, and Push is blocked until every phase is complete.
 
 ### Phase order (non-linear, revisit allowed)
-Brainstorm → Design (Frontend) → Backend (API) → Database → Test Cases → Push to Github. The order in between is flexible; the **Gate is the single completeness check** before pushing.
+Brainstorm → Design (Frontend) → Backend (API) → Database → Test Cases → Local Preview → Push to Github. The order in between is flexible; the **Gate is the single completeness check** before pushing. The **Local Preview** runs the app on the user's machine and shows it to them for sign-off before anything ships.
 
 ### Connections used per phase
 - **Database phase → Supabase:** when the user reaches Database, they ask IT to create a Supabase project; IT returns the **Token** (URL + `service_role` key for the backend; anon key only if a frontend client calls Supabase directly) via a secure channel; the user connects it via the **Supabase MCP** in Cowork. After the schema doc is approved, the migrations are **applied to Supabase automatically via the Supabase MCP (`apply_migration`)** — no copy-paste into the SQL Editor. The backend connects with `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (server-only, bypasses RLS). Never commit the token — keep it in env.
@@ -80,7 +80,8 @@ all agents        → gate entries recorded by the orchestrator in docs/PHASE_ST
 - **Delegate when:** designs are gate-passed and the API spec exists, or any UI implementation changes.
 - **Prompt must include:** the React/TypeScript/Tailwind rules from *Phase 4 — Development* (naming, strict TS, React best practices, no inline styles) + paths to `docs/requirements.md`, `docs/api-spec.md`, and `design/` + `ref/02_DESIGN/Style_Apple.md` (read before implementing any UI — every time).
 - **Produces:** `src/frontend/**` — components implementing the approved designs pixel-faithfully with brand tokens, mobile-first responsive, unit tests alongside code (FE coverage ≥ 70%).
-- **Returns:** file paths + Phase 4 FE gate checklist (no `any`, no inline styles, no `console.log`, tests green).
+- **Local Preview (Phase 4.5):** once frontend + backend integrate, runs both dev servers and surfaces the live app at `http://localhost:5173` for the user to review (see `ref/04_DEVELOPMENT/4.6_Local_Preview.md`). The worker prepares the preview; **the user approves it through the orchestrator/main session** (approvals never stay with a worker) before Deploy.
+- **Returns:** file paths + Phase 4 FE gate checklist (no `any`, no inline styles, no `console.log`, tests green) + Preview gate status.
 
 #### 4. Backend Engineer Agent — Phase 3 Database + backend part of Phase 4
 - **Delegate when:** requirements are approved and data/API design starts, or schema/endpoints change.
@@ -120,8 +121,8 @@ Create `sopify-pm`, `sopify-uxui-design`, `sopify-frontend-engineer`, and `sopif
 ## The SDLC journey (do not skip phases)
 
 ```
-0. Onboarding → 1. Requirements → 2. Design → 3. Database → 4. Development → 5. Deploy → 6. Testing
-                                                     ↑___________ 7. Git Workflow runs across ALL phases ___________↑
+0. Onboarding → 1. Requirements → 2. Design → 3. Database → 4. Development → 4.5 Local Preview → 5. Deploy → 6. Testing
+                                                     ↑_______________ 7. Git Workflow runs across ALL phases _______________↑
 ```
 
 Each phase has a **gate** that must pass before the next begins. Do not start a downstream phase on an unapproved upstream artifact: API shape derives from the schema, the schema derives from requirements, and the UI derives from acceptance criteria. Churn upstream means wasted work downstream.
@@ -141,6 +142,7 @@ Pull the matching reference into context when you're actually doing that phase's
 | 2 · Design | wireframes / UI to brand | `ref/02_DESIGN/` — 2.1 Wireframe_with_Figma_Make, 2.2 UI_Design_with_Figma_Make |
 | 3 · Database | schema doc + migrations | `ref/03_DATABASE/` — 3.1 ERD, 3.2 Database_Schema_Document, 3.3 Migration_from_Figma_DataContext |
 | 4 · Development | any backend/frontend code | `ref/04_DEVELOPMENT/Code_Standard_Guide.md` (⭐ SOP-DEV-001, read first), 4.1 Project_Init, 4.1.1 Dependencies, 4.2 Import_Wireframes, 4.3 Database_Design, 4.4 Backend_Project, 4.5 Frontend_Integration |
+| 4.5 · Local Preview | running the app to show the user before deploy | `ref/04_DEVELOPMENT/4.6_Local_Preview.md` |
 | 6 · Testing | writing tests / pre-release | `ref/06_TESTING/` — 6.1 Strategy, 6.2 Unit, 6.3 Integration, 6.4 Performance, 6.5 Security, UAT_Scenario_Template |
 | 7 · Git Workflow | branching, commits, PRs | `ref/07_GIT_WORKFLOW/` — 7.1 Branching, 7.2 Commit, 7.3 Pull_Request, 7.4 Code_Review, 7.5 GitHub_Actions_CI |
 | 5 · Deploy (Railway) | shipping to Railway | `ref/05_DEPLOY/` — 5.2 Pre_Deploy_Checklist, 5.3 Environment_Variables, 5.4 Deploy_Steps, 5.5 Post_Deploy_Verification, 5.6 Troubleshooting |
@@ -386,6 +388,20 @@ Validate input with Zod · hash passwords with bcrypt · **parameterized queries
 
 ---
 
+## Phase 4.5 — Local Preview (show the user the running app before deploy)
+
+Sopify is run by a **Non-Dev User** — they need to *see* the working app, not read code. After Development integrates the frontend and backend, **run the app locally and show it to the user for sign-off before anything is pushed or deployed.** This is a review/approval gate, not a deploy — nothing leaves the user's machine.
+
+Start the backend first (`cd backend && npm run dev`, confirm `http://localhost:5000/health` returns ok), then the frontend (`cd frontend && npm run dev`, open `http://localhost:5173`). Confirm the local wiring matches the dev defaults — CORS `ALLOWED_ORIGINS=http://localhost:5173` and `VITE_API_URL=http://localhost:5000`. Then walk the user through each core screen mapped to the approved acceptance criteria, and confirm every async surface shows its loading / empty / error states.
+
+### Quality gate (Phase 4.5)
+
+✅ both dev servers up · ✅ `/health` returns ok · ✅ home + every core screen reachable at `localhost:5173` · ✅ no console errors · ✅ loading/empty/error states render · ✅ **the user has seen the live preview and approved it** before moving to Deploy.
+
+> Deep reference: `ref/04_DEVELOPMENT/4.6_Local_Preview.md` — step-by-step start commands, what to present to the user, and preview troubleshooting (port in use, blank page, CORS, data not loading).
+
+---
+
 ## Phase 6 — Testing
 
 ### Testing pyramid + coverage targets
@@ -447,7 +463,7 @@ Senior always reviews: logic + edge cases, security (SQL injection, exposed secr
 
 ### Pre-deploy checklist
 
-Build must pass **locally** first (`npm run build` for both apps — if it fails locally it fails on Railway). No TypeScript errors (`tsc --noEmit`). `typescript`, `tsx`, and build-time `@types/*` must be in `dependencies` (not `devDependencies`) — Railway sets `NODE_ENV=production` and skips devDependencies. Backend exposes `GET /api/health` returning `{ status: "ok" }`. Config files present: `railway.toml`, `nixpacks.toml` (Node 22 — `nodejs_22` + `engines.node` ≥ 22, required for Supabase's native WebSocket), `tsconfig.json` `lib` includes `"DOM"` + `skipLibCheck` when using `@supabase/*`, correct `package.json` scripts (`build`, `start`). After `git push`, verify `package.json`/`tsconfig.json`/`nixpacks.toml` on GitHub match local (sandbox mounts can truncate files mid-push). Credentials ready: Supabase URL + `service_role` key (backend connects with this; anon key only if a frontend client calls Supabase directly), and a freshly generated production JWT secret (`openssl rand -base64 32` — never reuse the dev value). Latest code pushed to GitHub. Never commit `.env`. After deploy: run smoke tests + post-deploy verification.
+Build must pass **locally** first (`npm run build` for both apps — if it fails locally it fails on Railway), and reproduce the install the way Railway does: **commit `package-lock.json` and test with `npm ci`** (not just `npm install`) — a stale or missing lockfile fails the Railway build even when local `npm install` worked. No TypeScript errors (`tsc --noEmit`). `typescript`, `tsx`, and build-time `@types/*` must be in `dependencies` (not `devDependencies`) — Railway sets `NODE_ENV=production` and skips devDependencies; the frontend's `serve` (prod static server) must likewise be in `dependencies`. Backend exposes `GET /api/health` returning `{ status: "ok" }` **and binds the injected port** — `app.listen(process.env.PORT || 5001)`, never a hardcoded port (the frontend serve binds it too: `serve -s build -l $PORT`); a service that ignores `$PORT` builds fine but its URL stays unreachable / health check times out. Config files present: `railway.toml`, `nixpacks.toml` (Node 22 — `nodejs_22` + `engines.node` ≥ 22, required for Supabase's native WebSocket), `tsconfig.json` `lib` includes `"DOM"` + `skipLibCheck` when using `@supabase/*`, working `package.json` scripts (`build`, `start` — run them locally to confirm). On Railway each service sets its **Root Directory** to its own subfolder (`backend/`, `frontend/`) in the monorepo. After `git push`, verify `package.json`/`tsconfig.json`/`nixpacks.toml` on GitHub match local (sandbox mounts can truncate files mid-push). Remember frontend env vars (`REACT_APP_*` / `VITE_*`) are **baked at build time** — changing them on Railway needs a rebuild/redeploy, not just a restart. Credentials ready: Supabase URL + `service_role` key (backend connects with this; anon key only if a frontend client calls Supabase directly), and a freshly generated production JWT secret (`openssl rand -base64 32` — never reuse the dev value). Latest code pushed to GitHub. Never commit `.env`. After deploy: run smoke tests + post-deploy verification.
 
 Security baseline:
 
