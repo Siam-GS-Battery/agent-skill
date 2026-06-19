@@ -1,116 +1,19 @@
 ---
 name: sopify-sdlc
-description: "GS Battery end-to-end SDLC SOP — one self-contained playbook for the whole lifecycle, from the team's SOP-SDLC docs. Covers requirements (MoSCoW, user stories, acceptance criteria, DoR/DoD), design (Figma Make brand guideline: colors, IBM Plex Sans typography, spacing, responsive), database (PostgreSQL schema, naming, constraints, indexes, triggers, migrations, RLS), development (Code Standard SOP-DEV-001: TypeScript strict, MVC layering, Zod validation, standard API response, security), and testing (Vitest/Supertest/k6, coverage, quality gates). The full SOP with templates and examples lives in the bundled ref/ folder. Includes a multi-agent pattern (PM, UXUI, Frontend, Backend, Tester) that delegates each phase to an isolated sub-agent so SOP rules are never lost mid-session. Apply at every phase; treat every rule as binding — work was rejected for skipping validation or tests."
 metadata:
   version: 1.4.0
   hermes:
-    tags: [gs-battery, sopify-vibe, sdlc, requirements, design, database, backend, testing, supabase, react, typescript, postgresql, multi-agent]
+    tags: [gs-battery, sopify-vibe, sdlc, requirements, design, database, backend, testing, supabase, react, typescript, postgresql]
 ---
 
 # sopify-sdlc — GS Battery End-to-End SDLC SOP
 
 You are building a GS Battery internal product across the **full software development life cycle**. This skill is the single source of truth and is derived directly from the team's SOP-SDLC documentation — it stands on its own and does not depend on any other skill. The stack is fixed: **React + TypeScript + Tailwind CSS** on the frontend, **Node.js + Express + TypeScript** on the backend, and **PostgreSQL** (via Supabase) for data. Treat every rule below as binding — work that ignores them gets rejected at review.
 
-## Operating Model — how Sopify runs in Claude Cowork
-
-Sopify is a **Working Procedure**, not an app. A Non-Dev User runs it inside Claude Cowork to build a Web App to this SOP.
-
-### One-time setup
-- **IT** connects the **Supabase MCP Server** to Cowork.
-
-### Entry point — `/sop`
-The user types **`/sop`** to start. This skill is a **single hub** that links every phase. It is **non-linear**: the user may enter any phase first and jump back and forth freely; the skill keeps each phase's state and artifacts. Free navigation does **not** waive the gates — a phase's output is only "final" once its quality gate passes, and completion is blocked until every phase is complete.
-
-### Phase order (non-linear, revisit allowed)
-Brainstorm → Design (Frontend) → Backend (API) → Database → Test Cases → Local Preview. The order in between is flexible; the **Gate is the single completeness check** before finishing. The **Local Preview** runs the app on the user's machine and shows it to them for sign-off.
-
 ### Connections used per phase
 - **Database phase → Supabase:** when the user reaches Database, they ask IT to create a Supabase project; IT returns the **Token** (URL + `service_role` key for the backend; anon key only if a frontend client calls Supabase directly) via a secure channel; the user connects it via the **Supabase MCP** in Cowork. After the schema doc is approved, the migrations are **applied to Supabase automatically via the Supabase MCP (`apply_migration`)** — no copy-paste into the SQL Editor. The backend connects with `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (server-only, bypasses RLS). Never commit the token — keep it in env.
 
 The phase details below define *how* to do each phase to standard; the operating model above defines *how the user moves through them*.
-
-## Multi-Agent Pattern — PM, UXUI Design, Frontend Engineer, Backend Engineer, Tester
-
-A full SDLC run is long. If one conversation carries every phase, rules from early phases drift to the middle of the context window and get silently dropped ("lost in the middle") — that is how validation, triggers, and gates get skipped. Prevent it with an **orchestrator / worker** pattern: the main session (orchestrator) holds only the plan and phase state; each phase's heavy work runs in a **dedicated sub-agent with a fresh, isolated context** that receives its SOP slice verbatim.
-
-### Ground rules (binding)
-
-1. **Sub-agents start fresh and inherit nothing.** They do not see this skill, the conversation, or earlier phases automatically. Every delegation prompt must carry (a) the full SOP slice for that phase copied from this file, and (b) the approved upstream artifacts — passed as **file paths** to read, never as long pasted blobs.
-2. **Explicitly attach this skill to custom agents.** In Claude Code, sub-agents only load skills listed in their frontmatter `skills:` field (built-in agents cannot load skills at all). In Cowork, include the phase rules directly in the Task prompt.
-3. **One phase = one owner agent.** A worker never spans another agent's phase; cross-phase decisions return to the orchestrator.
-4. **Workers return a compact report, not a transcript:** artifact path(s) written, the phase quality-gate checklist with per-item ✅/❌, and open questions — roughly 30 lines max. The orchestrator never re-ingests full file contents into its own context.
-5. **The orchestrator keeps a phase-state ledger on disk** — `docs/PHASE_STATE.md` in the repo: one row per phase (owner agent, status, artifact path, gate result, user approval, date). Before any delegation or gate decision, **re-read the ledger from disk**, never trust conversational memory.
-6. **User approvals stay with the orchestrator.** Workers prepare approval-gated artifacts (requirements doc, schema doc) but never declare them approved — the user approves through the main session.
-7. **No phase is "final" until the Tester independently verifies its quality gate** against the actual files (agent 5 below) and the orchestrator records the result in the ledger — a worker's own ✅ is never sufficient.
-
-### Artifact chain (the handoff contract)
-
-Each agent reads its inputs and writes its outputs to fixed repo paths, so context never has to carry them:
-
-```
-PM                → docs/requirements.md (MoSCoW, stories, AC, NFRs, DoR/DoD)
-UXUI Design       → design/ (Figma Make prompts, exports, design README)        reads requirements.md
-Backend Engineer  → docs/schema.md + migrations/*.sql + docs/api-spec.md + src/backend/**   reads requirements.md
-Frontend Engineer → src/frontend/**                                              reads requirements.md + api-spec.md + design/
-Tester            → __tests__/** + docs/test-report.md + gate verdicts           reads all of the above
-all agents        → gate entries recorded by the orchestrator in docs/PHASE_STATE.md
-```
-
-### The five agents
-
-#### 1. PM Agent — Phase 1 Requirements (+ DoR/DoD enforcement, UAT sign-off prep)
-- **Delegate when:** starting a project, requirements change, or a task needs DoR/DoD arbitration.
-- **Prompt must include:** the entire *Phase 1 — Requirements* section (MoSCoW, user stories, AC, DoR/DoD, NFRs) + the user's raw brief.
-- **Produces:** `docs/requirements.md` — MoSCoW table, stories grouped by role, ≥1 testable AC per story, NFRs, roadmap/Asana link — plus UAT scenarios derived from the AC for Phase 6 Gate 2.
-- **Returns:** artifact path + Phase 1 gate checklist + questions needing user decisions.
-
-#### 2. UXUI Design Agent — Phase 2 Design
-- **Delegate when:** requirements are approved and design starts, or any screen is added/changed.
-- **Prompt must include:** the entire *Phase 2 — Design* section (brand colors, IBM Plex Sans typography, spacing/radius/layout, breakpoints, component & accessibility rules) + path to `docs/requirements.md` + `ref/02_DESIGN/Style_Apple.md` (read in full before any UI is created — every time).
-- **Produces:** Figma Make prompts that state the brand guideline, wireframes/screens covering every story, exports (PNG @2x / SVG) committed under `design/` + design README with the Figma link, loading/empty/error states specified for every async surface.
-- **Returns:** paths + Phase 2 gate checklist (tokens match, 375px holds, Tab/Enter works, async states present).
-
-#### 3. Frontend Engineer Agent — frontend part of Phase 4
-- **Delegate when:** designs are gate-passed and the API spec exists, or any UI implementation changes.
-- **Prompt must include:** the React/TypeScript/Tailwind rules from *Phase 4 — Development* (naming, strict TS, React best practices, no inline styles) + paths to `docs/requirements.md`, `docs/api-spec.md`, and `design/` + `ref/02_DESIGN/Style_Apple.md` (read before implementing any UI — every time).
-- **Produces:** `src/frontend/**` — components implementing the approved designs pixel-faithfully with brand tokens, mobile-first responsive, unit tests alongside code (FE coverage ≥ 70%).
-- **Local Preview (Phase 4.5):** **automatically starts both dev servers at the beginning of development and keeps them running continuously in the background while working** so live preview updates are always available. Surfaces the live app at `http://localhost:5173` for the user to review (see `ref/04_DEVELOPMENT/4.6_Local_Preview.md`). The worker prepares the preview; **the user approves it through the orchestrator/main session** (approvals never stay with a worker) before completion.
-- **Returns:** file paths + Phase 4 FE gate checklist (no `any`, no inline styles, no `console.log`, tests green) + Preview gate status.
-
-#### 4. Backend Engineer Agent — Phase 3 Database + backend part of Phase 4
-- **Delegate when:** requirements are approved and data/API design starts, or schema/endpoints change.
-- **Prompt must include:** the entire *Phase 3 — Database* and *Phase 4 — Development* backend sections (naming, required columns + trigger, constraints/indexes, migrations, RLS; MVC layering, error classes, Zod, standard response shape, security) + path to `docs/requirements.md`.
-- **Produces:** `docs/schema.md` FIRST (stop — user approval via orchestrator before any SQL), then `migrations/[timestamp]_*.sql` with UP/DOWN. **Once the orchestrator has recorded the user's schema approval** in `docs/PHASE_STATE.md`, the migrations are **applied to Supabase automatically via the Supabase MCP `apply_migration` tool** (one call per file, UP section only, in dependency order) as the final step of backend scaffold — not a manual SQL-Editor step. Then `docs/api-spec.md` and `src/backend/**` (Controller → Service → Repository, Zod on every body/query/params, auth middleware), unit tests alongside code (BE coverage ≥ 80%). **Gate (binding):** never call `apply_migration`/`execute_sql` DDL before that approval is recorded; destructive SQL (`DROP`/`TRUNCATE`/`ALTER … DROP`) is never auto-applied — it needs a separate approval.
-- **Returns:** paths + Phase 3 gate checklist + per-endpoint Phase 4 gate checklist + confirmation rollback was tested.
-
-#### 5. Tester Agent — Phase 6 Testing + gate verification for every phase
-- **Delegate when:** any worker reports done (verify that phase's gate), when integration/E2E coverage is needed, and once more before completion.
-- **Prompt must include:** the entire *Phase 6 — Testing* section (pyramid, coverage targets, practices, Gate 1/Gate 2) + the relevant phase's **quality-gate checklist** from this file + the artifact paths to inspect + path to `docs/requirements.md` (AC = the test cases).
-- **Produces:** integration tests under `__tests__/` (Supertest, 100% of endpoints ≥ happy path), UAT scenarios from the AC, k6 performance runs (P95 < 2s) and OWASP scan results, `docs/test-report.md` with coverage numbers.
-- **Gate verification duty (read-only on others' code — it never fixes, it reports):** independently re-checks every gate item against the actual files — greps for `any`/`console.log`/inline styles, confirms triggers/ON DELETE/indexes in migrations, runs lint/type-check/tests — and returns per-item ✅/❌ with file:line evidence for every ❌. Any ❌ → the phase goes back to its owner agent.
-- **Returns:** test-report path + Gate 1/Gate 2 status + per-phase gate verdicts. Unit tests remain the owner agents' duty (written alongside code); the Tester verifies coverage targets are actually met.
-
-### Claude Code wiring (when run outside Cowork)
-
-Define custom agents in `.claude/agents/`, each listing this skill explicitly — sub-agents never inherit it:
-
-```markdown
----
-name: sopify-backend-engineer
-description: "Builds GS Battery PostgreSQL schemas and Express/TypeScript APIs to SOP-DEV-001. Use for any database or API task."
-tools: Bash, Glob, Grep, Read, Write, Edit, Skill
-skills: sopify-sdlc
----
-You are the Backend Engineer worker. Follow Phase 3 and Phase 4 of sopify-sdlc exactly.
-Read docs/requirements.md before designing; stop for schema approval before writing SQL.
-Return: files written + the phase quality gate checklists.
-```
-
-Create `sopify-pm`, `sopify-uxui-design`, `sopify-frontend-engineer`, and `sopify-tester` the same way (tester: read-only on others' code — `Bash, Glob, Grep, Read` plus `Write` limited to `__tests__/` and `docs/test-report.md`). The orchestrator (main session) delegates one phase at a time and writes the ledger.
-
-### Anti-"lost in the middle" checklist (orchestrator, every delegation)
-
-    ✅ phase SOP slice copied verbatim into the worker prompt · ✅ upstream artifacts passed as paths, not pasted · ✅ ledger re-read from disk before delegating · ✅ worker reply ≤ ~30 lines, artifacts on disk · ✅ Tester verified the gate against files and the result is recorded · ✅ user approval captured in the ledger for requirements & schema · ✅ if the main session grows long, re-read this skill's relevant section before acting — never act from memory of it.
 
 ## The SDLC journey (do not skip phases)
 
@@ -418,8 +321,6 @@ Use **Test-Driven Development (TDD)** — write tests **before** writing functio
 ## DO
 
 - Move phase by phase; pass each gate before the next; get user approval on the requirements and schema documents before downstream work.
-- **Delegate each phase to its owner agent** (PM, UXUI Design, Frontend Engineer, Backend Engineer) with the phase's SOP slice in the prompt; run the **Tester** to verify the gate before marking any phase final.
-- Keep the orchestrator lean: artifacts on disk, compact worker reports, phase-state ledger in `docs/PHASE_STATE.md` re-read before every decision.
 - Enforce DoR before starting a task and DoD before merging.
 - Validate every request with Zod; return the one standard response shape.
 - Give every table a PK + `created_at`/`updated_at` + trigger; index foreign keys; declare ON DELETE on every FK.
@@ -428,8 +329,6 @@ Use **Test-Driven Development (TDD)** — write tests **before** writing functio
 ## DO NOT
 
 - **Skip a phase gate** or build on an unapproved upstream artifact.
-- **Run multiple phases in one bloated context** — delegate to the owner agents; never paste full artifacts between agents (pass paths); never act on a remembered rule when the file can be re-read.
-- **Let an agent work outside its phase, self-approve a gated artifact, or mark its own gate as final** — gate verdicts come from the Tester only.
 - **Use `any`**, inline styles, or class components.
 - **Echo internal `err.message`** in unhandled 5xx responses, or put business logic in controllers.
 - **Interpolate strings into SQL** — parameterize. **Hardcode or commit secrets** — ever.
@@ -441,5 +340,4 @@ Use **Test-Driven Development (TDD)** — write tests **before** writing functio
 2. ✅ UI matches the brand guideline (colors, IBM Plex Sans, spacing), is accessible and responsive, with full async states.
 3. ✅ Schema document approved; migrations applied with UP/DOWN; constraints, indexes, and triggers in place.
 4. ✅ Code passes the per-endpoint gate; strict TS, MVC-layered, validated, standard response shape.
-5. ✅ Testing Gate 1 (every PR) and Gate 2 (pre-release) both passed; coverage targets met.
-6. ✅ Every phase was produced by its owner agent, its gate verified by the Tester, and recorded ✅ in `docs/PHASE_STATE.md`.
+5. ✅ Testing Gate 1 (local checks) and Gate 2 (pre-release) both passed; coverage targets met.
