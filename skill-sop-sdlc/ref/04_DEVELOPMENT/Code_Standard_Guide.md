@@ -182,6 +182,24 @@ const pageSize = config.pageSize ?? 20;
 const pageSize = config.pageSize || 20;
 ```
 
+**ระวังเรื่อง Ternary operator กับ Discriminated Union:**
+เมื่อใช้ ternary operator (เช่น `condition ? 'a' : 'b'`) ในการกำหนดค่าให้กับตัวแปรประเภท Discriminated Union ตัวคอมไพเลอร์ TypeScript จะประเมินค่าเป็น union string literals ทั่วไป ซึ่งอาจไม่ผ่าน static analysis type check (เช่น Error TS2345) หากไม่ตรงกับ schema ของ union Type ปลายทางเป๊ะๆ 
+
+วิธีแก้ไข: ให้กำหนด type ชัดเจนที่ตัวแปร หรือใช้ Type Assertion (`as View` หรือ `as const`) ครอบคลุม:
+
+```typescript
+type View = 'admin-events' | 'login' | 'dashboard';
+
+// ❌ เกิด Error TS2345 ใน tsc เนื่องจากประเมินค่าเป็น string ทั่วไป
+const view = isAuthenticated() ? 'admin-events' : 'login';
+
+// ✅ วิธีแก้แบบที่ 1: กำหนด type ชัดเจนที่ตัวแปร
+const view: View = isAuthenticated() ? 'admin-events' : 'login';
+
+// ✅ วิธีแก้แบบที่ 2: ใช้ Type Assertion
+const view = (isAuthenticated() ? 'admin-events' : 'login') as View;
+```
+
 ---
 
 ## 4. React Best Practices
