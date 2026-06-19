@@ -1,19 +1,19 @@
 ---
 name: sopify-sdlc
-description: "GS Battery end-to-end SDLC SOP — one self-contained playbook for the whole lifecycle, from the team's SOP-SDLC docs. Covers requirements (MoSCoW, user stories, acceptance criteria, DoR/DoD), design (Figma Make brand guideline: colors, IBM Plex Sans typography, spacing, responsive), database (PostgreSQL schema, naming, constraints, indexes, triggers, migrations, RLS), development (Code Standard SOP-DEV-001: TypeScript strict, MVC layering, Zod validation, standard API response, security), testing (Vitest/Supertest/k6, coverage, quality gates), git workflow (branching, Conventional Commits, PR + review), and deploy (Railway auto-deploy from main). The full SOP with templates and examples lives in the bundled ref/ folder. Includes a multi-agent pattern (PM, UXUI, Frontend, Backend, Tester) that delegates each phase to an isolated sub-agent so SOP rules are never lost mid-session. Apply at every phase; treat every rule as binding — work was rejected for skipping validation, tests, or pushing straight to main."
+description: "GS Battery end-to-end SDLC SOP — one self-contained playbook for the whole lifecycle, from the team's SOP-SDLC docs. Covers requirements (MoSCoW, user stories, acceptance criteria, DoR/DoD), design (Figma Make brand guideline: colors, IBM Plex Sans typography, spacing, responsive), database (PostgreSQL schema, naming, constraints, indexes, triggers, migrations, RLS), development (Code Standard SOP-DEV-001: TypeScript strict, MVC layering, Zod validation, standard API response, security), and testing (Vitest/Supertest/k6, coverage, quality gates). The full SOP with templates and examples lives in the bundled ref/ folder. Includes a multi-agent pattern (PM, UXUI, Frontend, Backend, Tester) that delegates each phase to an isolated sub-agent so SOP rules are never lost mid-session. Apply at every phase; treat every rule as binding — work was rejected for skipping validation, tests, or pushing straight to main."
 metadata:
   version: 1.4.0
   hermes:
-    tags: [gs-battery, sopify-vibe, sdlc, requirements, design, database, backend, testing, git, deploy, railway, supabase, react, typescript, postgresql, multi-agent]
+    tags: [gs-battery, sopify-vibe, sdlc, requirements, design, database, backend, testing, supabase, react, typescript, postgresql, multi-agent]
 ---
 
 # sopify-sdlc — GS Battery End-to-End SDLC SOP
 
-You are building a GS Battery internal product across the **full software development life cycle**. This skill is the single source of truth and is derived directly from the team's SOP-SDLC documentation — it stands on its own and does not depend on any other skill. The stack is fixed: **React + TypeScript + Tailwind CSS** on the frontend, **Node.js + Express + TypeScript** on the backend, **PostgreSQL** (via Supabase) for data, deployed on **Railway** — auto-deploy from the `main` branch. Treat every rule below as binding — work that ignores them gets rejected at review.
+You are building a GS Battery internal product across the **full software development life cycle**. This skill is the single source of truth and is derived directly from the team's SOP-SDLC documentation — it stands on its own and does not depend on any other skill. The stack is fixed: **React + TypeScript + Tailwind CSS** on the frontend, **Node.js + Express + TypeScript** on the backend, and **PostgreSQL** (via Supabase) for data. Treat every rule below as binding — work that ignores them gets rejected at review.
 
 ## Operating Model — how Sopify runs in Claude Cowork
 
-Sopify is a **Working Procedure**, not an app. A Non-Dev User runs it inside Claude Cowork to build a Web App to this SOP, then ships it to Github and Railway.
+Sopify is a **Working Procedure**, not an app. A Non-Dev User runs it inside Claude Cowork to build a Web App to this SOP, then ships it to Github.
 
 ### One-time setup
 - **IT** connects the **Supabase MCP Server** to Cowork.
@@ -28,10 +28,6 @@ Brainstorm → Design (Frontend) → Backend (API) → Database → Test Cases �
 ### Connections used per phase
 - **Database phase → Supabase:** when the user reaches Database, they ask IT to create a Supabase project; IT returns the **Token** (URL + `service_role` key for the backend; anon key only if a frontend client calls Supabase directly) via a secure channel; the user connects it via the **Supabase MCP** in Cowork. After the schema doc is approved, the migrations are **applied to Supabase automatically via the Supabase MCP (`apply_migration`)** — no copy-paste into the SQL Editor. The backend connects with `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (server-only, bypasses RLS). Never commit the token — keep it in env.
 - **Push phase → Github:** push code to `SiamGS-Sopify` through the **Github Connection** (no zip handoff).
-
-### Deploy loop — Railway
-- **First time:** IT links the Github repo to **Railway** (service, env, build/start, `GET /api/health`).
-- **After that:** the user edits via Cowork → **auto push to `main`** → **Railway auto-deploys**. This is the continuous maintenance / development loop.
 
 The phase details below define *how* to do each phase to standard; the operating model above defines *how the user moves through them and ships*.
 
@@ -80,7 +76,7 @@ all agents        → gate entries recorded by the orchestrator in docs/PHASE_ST
 - **Delegate when:** designs are gate-passed and the API spec exists, or any UI implementation changes.
 - **Prompt must include:** the React/TypeScript/Tailwind rules from *Phase 4 — Development* (naming, strict TS, React best practices, no inline styles) + paths to `docs/requirements.md`, `docs/api-spec.md`, and `design/` + `ref/02_DESIGN/Style_Apple.md` (read before implementing any UI — every time).
 - **Produces:** `src/frontend/**` — components implementing the approved designs pixel-faithfully with brand tokens, mobile-first responsive, unit tests alongside code (FE coverage ≥ 70%).
-- **Local Preview (Phase 4.5):** **automatically starts both dev servers at the beginning of development and keeps them running continuously in the background while working** so live preview updates are always available. Surfaces the live app at `http://localhost:5173` for the user to review (see `ref/04_DEVELOPMENT/4.6_Local_Preview.md`). The worker prepares the preview; **the user approves it through the orchestrator/main session** (approvals never stay with a worker) before Deploy.
+- **Local Preview (Phase 4.5):** **automatically starts both dev servers at the beginning of development and keeps them running continuously in the background while working** so live preview updates are always available. Surfaces the live app at `http://localhost:5173` for the user to review (see `ref/04_DEVELOPMENT/4.6_Local_Preview.md`). The worker prepares the preview; **the user approves it through the orchestrator/main session** (approvals never stay with a worker) before completion.
 - **Returns:** file paths + Phase 4 FE gate checklist (no `any`, no inline styles, no `console.log`, tests green) + Preview gate status.
 
 #### 4. Backend Engineer Agent — Phase 3 Database + backend part of Phase 4
@@ -90,7 +86,7 @@ all agents        → gate entries recorded by the orchestrator in docs/PHASE_ST
 - **Returns:** paths + Phase 3 gate checklist + per-endpoint Phase 4 gate checklist + confirmation rollback was tested.
 
 #### 5. Tester Agent — Phase 6 Testing + gate verification for every phase
-- **Delegate when:** any worker reports done (verify that phase's gate), when integration/E2E coverage is needed, and once more before Push/deploy (Release Gate 2).
+- **Delegate when:** any worker reports done (verify that phase's gate), when integration/E2E coverage is needed, and once more before completion.
 - **Prompt must include:** the entire *Phase 6 — Testing* section (pyramid, coverage targets, practices, Gate 1/Gate 2) + the relevant phase's **quality-gate checklist** from this file + the artifact paths to inspect + path to `docs/requirements.md` (AC = the test cases).
 - **Produces:** integration tests under `__tests__/` (Supertest, 100% of endpoints ≥ happy path), UAT scenarios from the AC, k6 performance runs (P95 < 2s) and OWASP scan results, `docs/test-report.md` with coverage numbers.
 - **Gate verification duty (read-only on others' code — it never fixes, it reports):** independently re-checks every gate item against the actual files — greps for `any`/`console.log`/inline styles, confirms triggers/ON DELETE/indexes in migrations, runs lint/type-check/tests — and returns per-item ✅/❌ with file:line evidence for every ❌. Any ❌ → the phase goes back to its owner agent.
@@ -116,22 +112,19 @@ Create `sopify-pm`, `sopify-uxui-design`, `sopify-frontend-engineer`, and `sopif
 
 ### Anti-"lost in the middle" checklist (orchestrator, every delegation)
 
-✅ phase SOP slice copied verbatim into the worker prompt · ✅ upstream artifacts passed as paths, not pasted · ✅ ledger re-read from disk before delegating · ✅ worker reply ≤ ~30 lines, artifacts on disk · ✅ Tester verified the gate against files and the result is recorded · ✅ user approval captured in the ledger for requirements & schema · ✅ if the main session grows long, re-read this skill's relevant section before acting — never act from memory of it.
+    ✅ phase SOP slice copied verbatim into the worker prompt · ✅ upstream artifacts passed as paths, not pasted · ✅ ledger re-read from disk before delegating · ✅ worker reply ≤ ~30 lines, artifacts on disk · ✅ Tester verified the gate against files and the result is recorded · ✅ user approval captured in the ledger for requirements & schema · ✅ if the main session grows long, re-read this skill's relevant section before acting — never act from memory of it.
 
 ## The SDLC journey (do not skip phases)
 
 ```
-0. Onboarding → 1. Requirements → 2. Design → 3. Database → 4. Development → 4.5 Local Preview → 5. Deploy → 6. Testing
-                                                     ↑_______________ 7. Git Workflow runs across ALL phases _______________↑
+0. Onboarding → 1. Requirements → 2. Design → 3. Database → 4. Development → 4.5 Local Preview → 6. Testing
 ```
 
 Each phase has a **gate** that must pass before the next begins. Do not start a downstream phase on an unapproved upstream artifact: API shape derives from the schema, the schema derives from requirements, and the UI derives from acceptance criteria. Churn upstream means wasted work downstream.
 
-> Numbering note: the SOP labels Deploy as Phase 5 and Testing as Phase 6, but you always **test before you deploy**. This skill keeps the SOP labels for traceability while presenting Testing (Phase 6) before Deploy (Phase 5) in the order you actually work.
-
 ## Reference library — the full SOP lives in `ref/`
 
-This SKILL.md is the operating summary: enough to work to standard on the common path. The team's complete SOP — every template, worked example, full schema, code-standard guide, step-by-step deploy, and the AWS build-out — lives in the `ref/` folder beside this file. The summary tells you *what* the rule is; the reference tells you *exactly how* to satisfy it, with examples.
+This SKILL.md is the operating summary: enough to work to standard on the common path. The team's complete SOP — every template, worked example, full schema, code-standard guide, and test suite — lives in the `ref/` folder beside this file. The summary tells you *what* the rule is; the reference tells you *exactly how* to satisfy it, with examples.
 
 Pull the matching reference into context when you're actually doing that phase's work, when a gate item is unclear, or when you need a template/example rather than a rule. Don't preload everything — read the one file you need, when you need it. Each folder has an `INDEX.md` listing its documents; the descriptions are in Thai but the documents themselves are bilingual (Thai prose, English code and terms).
 
@@ -144,11 +137,8 @@ Pull the matching reference into context when you're actually doing that phase's
 | 4 · Development | any backend/frontend code | `ref/04_DEVELOPMENT/Code_Standard_Guide.md` (⭐ SOP-DEV-001, read first), 4.1 Project_Init, 4.1.1 Dependencies, 4.2 Import_Wireframes, 4.3 Database_Design, 4.4 Backend_Project, 4.5 Frontend_Integration |
 | 4.5 · Local Preview | running the app to show the user before deploy | `ref/04_DEVELOPMENT/4.6_Local_Preview.md` |
 | 6 · Testing | writing tests / pre-release | `ref/06_TESTING/` — 6.1 Strategy, 6.2 Unit, 6.3 Integration, 6.4 Performance, 6.5 Security, UAT_Scenario_Template |
-| 7 · Git Workflow | branching, commits, PRs | `ref/07_GIT_WORKFLOW/` — 7.1 Branching, 7.2 Commit, 7.3 Pull_Request, 7.4 Code_Review, 7.5 GitHub_Actions_CI |
-| 5 · Deploy (Railway) | shipping to Railway | `ref/05_DEPLOY/` — 5.2 Pre_Deploy_Checklist, 5.3 Environment_Variables, 5.4 Deploy_Steps, 5.5 Post_Deploy_Verification, 5.6 Troubleshooting |
-| 5 · Deploy (AWS) | EC2/RDS/S3/CloudFront/WAF build | `ref/08_AWS/` — 8.0 Overview → 8.7 CICD, 8.8 Go_Live_Checklist |
 
-If a request maps cleanly to one phase (e.g. "write the migration", "set up the CI workflow"), open that phase's reference first so you reproduce the team's exact format rather than a generic one.
+If a request maps cleanly to one phase (e.g. "write the migration", "set up the test runner"), open that phase's reference first so you reproduce the team's exact format rather than a generic one.
 
 ---
 
@@ -428,56 +418,6 @@ Write tests **alongside** code, not after · Arrange-Act-Assert · name tests by
 
 ---
 
-## Phase 7 — Git Workflow (runs across all phases)
-
-### Branches
-
-`main` (production, protected) and `develop` (integration, protected) are never committed to directly. Supporting branches merge into `develop` (or `main` for hotfix/release):
-
-`feature/` · `fix/` · `refactor/` · `chore/` → `develop` | `hotfix/` · `release/` → `main` then `develop`.
-
-Naming: `<type>/<asana-task-id>-<short-description>`, lowercase, hyphens, 2–5 words, no Thai, no special chars — e.g. `feature/1234567890-add-login`. Always put the Asana task link in the PR description.
-
-Daily flow: `git pull origin develop` each morning → `checkout -b feature/xxx` → commit every 1–2h → push + open PR with the template. Rebase onto `develop` to update; delete the branch after merge.
-
-### Commits — Conventional Commits
-
-`<type>(<scope>): <subject>` — types: `feat fix docs style refactor test chore perf ci build revert`; common scopes: `auth api ui db config deps`. Subject: imperative, lowercase, no trailing period, ≤ 50 chars. One logical change per commit. Breaking changes use `!` + a `BREAKING CHANGE:` footer. Never commit secrets or unrelated files.
-
-### Pull requests + code review
-
-Author self-reviews, ensures tests pass, fills the PR template, links the Asana task, and removes debug code before requesting review. Reviewer responds within 24h (hotfix < 2h) and labels each comment by severity:
-
-- **MUST** — bug / security / wrong logic → must fix before merge.
-- **SHOULD** — ought to fix, but a justified explanation is acceptable.
-- **NIT** — minor naming / style → optional.
-- **LEARN** — knowledge sharing → no change required.
-
-Senior always reviews: logic + edge cases, security (SQL injection, exposed secrets), readability, test coverage, standards conformance. Critique the code, not the person, and always pair feedback with a way forward ("If user is null this line crashes" — not "this is wrong"). Branch protection requires a PR + passing CI + 1 approval on `develop` (1–2 on `main`); no force-push or deletion of protected branches.
-
-> Deep reference: `ref/07_GIT_WORKFLOW/` — 7.1 Branching, 7.2 Commit_Message_Convention, 7.3 Pull_Request_Process (PR template), 7.4 Code_Review_Guidelines, and 7.5 GitHub_Actions_CI_Template (ready-to-use CI + approval gate).
-
----
-
-## Phase 5 — Deploy (Railway, auto-deploy from `main`)
-
-### Pre-deploy checklist
-
-Build must pass **locally** first (`npm run build` for both apps — if it fails locally it fails on Railway), and reproduce the install the way Railway does: **commit `package-lock.json` and test with `npm ci`** (not just `npm install`). If `package-lock.json` is missing (e.g. deleted during node_modules cleanup), the developer agent **must run `npm install` locally to regenerate it, and commit it to GitHub before deploying** so that `npm ci` on Nixpacks does not fail. No TypeScript errors (`tsc --noEmit`). `typescript`, `tsx`, and build-time `@types/*` must be in `dependencies` (not `devDependencies`) — Railway sets `NODE_ENV=production` and skips devDependencies; the frontend's `serve` (prod static server) must likewise be in `dependencies`. Backend exposes `GET /api/health` returning `{ status: "ok" }` **and binds the injected port** — `app.listen(process.env.PORT || 5000)`, never a hardcoded port (the frontend serve binds it too: `serve -s build -l $PORT`); a service that ignores `$PORT` builds fine but its URL stays unreachable / health check times out. Config files present: `railway.toml`, `nixpacks.toml` (Node 22 — `nodejs_22` + `engines.node` ≥ 22, required for Supabase's native WebSocket), `tsconfig.json` `lib` includes `"DOM"` + `skipLibCheck` when using `@supabase/*`, working `package.json` scripts (`build`, `start` — run them locally to confirm). On Railway each service sets its **Root Directory** to its own subfolder (`backend/`, `frontend/`) in the monorepo. After `git push`, verify `package.json`/`tsconfig.json`/`nixpacks.toml` on GitHub match local (sandbox mounts can truncate files mid-push). Remember frontend env vars (`REACT_APP_*` / `VITE_*`) are **baked at build time** — changing them on Railway needs a rebuild/redeploy, not just a restart. Credentials ready: Supabase URL + `service_role` key (backend connects with this; anon key only if a frontend client calls Supabase directly), and a freshly generated production JWT secret (`openssl rand -base64 32` — never reuse the dev value). Latest code pushed to GitHub. Never commit `.env`. After deploy: run smoke tests + post-deploy verification.
-
-Security baseline:
-
-- All DB credentials / API keys live in **Railway environment variables** — never hardcoded, never committed.
-- CI/CD: Railway connects to the GitHub repo and **auto-deploys from the `main` branch** — `main` stays protected (PR + CI only), so whatever lands there is production.
-
-### Go-live gate (Phase 5)
-
-✅ build green locally + CI · ✅ health check responds · ✅ prod secrets set in Railway env, none committed · ✅ HTTPS active on the Railway domain · ✅ Supabase DB backed up + RLS policies on · ✅ smoke + post-deploy verification passed · ✅ Release Gate 2 (Phase 6) passed.
-
-> Deep reference: Railway path → `ref/05_DEPLOY/` (5.2 Pre_Deploy_Checklist, 5.3 Environment_Variables, 5.4 Deploy_Steps, 5.5 Post_Deploy_Verification, 5.6 Troubleshooting). AWS path → `ref/08_AWS/` (8.0 → 8.7 step-by-step, 8.8 Go_Live_Checklist).
-
----
-
 ## DO
 
 - Move phase by phase; pass each gate before the next; get user approval on the requirements and schema documents before downstream work.
@@ -487,8 +427,6 @@ Security baseline:
 - Validate every request with Zod; return the one standard response shape.
 - Give every table a PK + `created_at`/`updated_at` + trigger; index foreign keys; declare ON DELETE on every FK.
 - Write tests alongside code; meet coverage targets; keep CI green.
-- Branch off `develop`, commit with Conventional Commits, open a PR linked to Asana, and get a senior approval.
-- Build locally before deploying; keep secrets in Railway environment variables; verify after deploy.
 
 ## DO NOT
 
@@ -498,9 +436,7 @@ Security baseline:
 - **Use `any`**, inline styles, or class components.
 - **Echo internal `err.message`** in unhandled 5xx responses, or put business logic in controllers.
 - **Interpolate strings into SQL** — parameterize. **Hardcode or commit secrets** — ever.
-- **Push straight to `main`/`develop`**, force-push protected branches, or merge with open MUST comments / failing CI.
-- **Ignore a failing test** or deploy before Release Gate 2 passes.
-- **Reuse dev JWT secrets in production** or expose the Supabase `service_role` key publicly.
+- **Ignore a failing test.**
 
 ## Overall quality gate before declaring the project "done"
 
@@ -509,6 +445,4 @@ Security baseline:
 3. ✅ Schema document approved; migrations applied with UP/DOWN; constraints, indexes, and triggers in place.
 4. ✅ Code passes the per-endpoint gate; strict TS, MVC-layered, validated, standard response shape.
 5. ✅ Testing Gate 1 (every PR) and Gate 2 (pre-release) both passed; coverage targets met.
-6. ✅ Every change shipped via a reviewed, Asana-linked PR with Conventional Commits.
-7. ✅ Deploy go-live gate passed; Railway auto-deploy from `main` live, secrets in Railway env, SSL active, Supabase backups + RLS in place.
-8. ✅ Every phase was produced by its owner agent, its gate verified by the Tester, and recorded ✅ in `docs/PHASE_STATE.md`.
+6. ✅ Every phase was produced by its owner agent, its gate verified by the Tester, and recorded ✅ in `docs/PHASE_STATE.md`.
