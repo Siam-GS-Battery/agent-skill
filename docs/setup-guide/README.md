@@ -1,6 +1,6 @@
 # Setup Guide (SOF-60)
 
-Generates `SETUP_GUIDE.docx` — a Thai-language setup guide for **GitHub MCP** and the **Agent Skill** (`skill-sop-sdlc`).
+Generates `SETUP_GUIDE.docx` — a Thai-language setup guide for the **Agent Skill** (`skill-sop-sdlc`).
 
 ## Build
 

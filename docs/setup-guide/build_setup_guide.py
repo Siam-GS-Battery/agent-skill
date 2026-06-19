@@ -116,7 +116,7 @@ def subheading(doc, text):
 
 # ---- composite blocks --------------------------------------------------------
 def _slug(label):
-    """'Supabase MCP' -> 'supabase-mcp' for deterministic image filenames."""
+    """'Agent Skill' -> 'agent-skill' for deterministic image filenames."""
     return "-".join(label.lower().split())
 
 
@@ -240,7 +240,7 @@ def build():
     title.paragraph_format.space_before = Pt(20)
     run(title, "คู่มือการติดตั้งและตั้งค่าเครื่องมือ (Setup Guide)", size=24, bold=True, color=NAVY)
     sub = doc.add_paragraph(); sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run(sub, "GitHub MCP · Agent Skill", size=15, color=BLUE)
+    run(sub, "Agent Skill Setup Guide", size=15, color=BLUE)
     p1 = doc.add_paragraph(); p1.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run(p1, "โครงการ [RD-M-26-O7-Q1-KR6.4/AI] Sopify & Risk Management AI Strategy", size=12, color=GREY)
     p2 = doc.add_paragraph(); p2.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -248,39 +248,11 @@ def build():
 
     heading(doc, "บทนำ", size=18)
     body(doc,
-         "เอกสารฉบับนี้เป็นคู่มือสำหรับทีมพัฒนาในการติดตั้งและตั้งค่าเครื่องมือหลัก 2 รายการที่ใช้ในโครงการ "
-         "ได้แก่ GitHub MCP สำหรับจัดการ source code และ Pull Request, "
-         "และ Agent Skill (skill-sop-sdlc) ซึ่งเป็นชุดมาตรฐาน SOP-SDLC ของทีม GS Battery")
-    body(doc,
-         "หมายเหตุสำหรับผู้เริ่มต้น: MCP (Model Context Protocol) คือ \"ช่องทางเชื่อมต่อมาตรฐาน\" "
-         "ที่ทำให้ Claude ทำงานร่วมกับระบบภายนอก (เช่น GitHub) ได้โดยตรงและปลอดภัย "
-         "เปรียบเหมือนปลั๊กมาตรฐานที่เสียบใช้กับอุปกรณ์ได้หลายชนิด")
+         "เอกสารฉบับนี้เป็นคู่มือสำหรับทีมพัฒนาในการติดตั้งและตั้งค่า Agent Skill (skill-sop-sdlc) "
+         "ซึ่งเป็นชุดมาตรฐาน SOP-SDLC ของทีม GS Battery")
 
-    # ---- 1. GitHub MCP ----
-    heading(doc, "1. GitHub MCP Setup")
-    subheading(doc, "ภาพรวม")
-    body(doc,
-         "GitHub MCP ช่วยให้ Claude ทำงานกับ repository ขององค์กร Siam-GS-Battery ได้โดยตรง เช่น อ่านไฟล์, "
-         "สร้าง branch, commit, เปิด Pull Request และจัดการ issues ตาม Git Workflow ของทีม")
-    subheading(doc, "ขั้นตอนการติดตั้ง")
-    steps_with_screenshots(doc, "GitHub MCP", [
-        "เปิด Claude Desktop ไปที่ Settings > Connectors > Add custom connector",
-        "กรอก Remote MCP server URL ของ GitHub: https://api.githubcopilot.com/mcp/",
-        "กด Connect แล้วล็อกอิน GitHub ผ่าน OAuth และกด Authorize",
-        "อนุญาตการเข้าถึง Organization Siam-GS-Battery (หากไม่เห็น repo ให้ขอ admin อนุมัติ OAuth App)",
-        "ทดสอบโดยให้ Claude เรียกดูไฟล์ใน repo เช่น agent-skill หรือ list branches",
-    ])
-    heading(doc, "Git Workflow ตาม SOP-SDLC (บังคับใช้)", size=15, color=RED, space_before=10)
-    prohibition_callout(doc, "ข้อบังคับ — ห้ามฝ่าฝืน", [
-        "ห้าม push ตรงเข้า main/develop — ทั้งสอง branch เป็น protected branch",
-        "แตก branch จาก develop สำหรับงานทั่วไป: feature/ · fix/ · refactor/ · chore/ (ส่วน hotfix/ และ release/ แตกจาก main)",
-        "ตั้งชื่อ branch ตามรูปแบบ <type>/<jira-task-id>-<short-description> เช่น feature/SOF-123-add-login — ใส่ Jira Task ID เสมอ",
-        "เขียน commit message แบบ Conventional Commits เช่น docs: add setup guide",
-        "เปิด Pull Request พร้อมลิงก์ Jira ticket และต้องผ่าน review + CI ก่อน merge แล้วลบ branch หลัง merge",
-    ])
-
-    # ---- 2. Agent Skill ----
-    heading(doc, "2. Agent Skill Setup")
+    # ---- 1. Agent Skill ----
+    heading(doc, "1. Agent Skill Setup")
     subheading(doc, "ภาพรวม")
     body(doc,
          "Agent Skill คือชุดความรู้และข้อกำหนดที่สอนให้ Claude ทำงานตามมาตรฐานของทีม โดย skill หลักของโครงการคือ "
@@ -292,7 +264,7 @@ def build():
     body(doc, "skill-sop-sdlc/evals/ — ชุดทดสอบสำหรับวัดคุณภาพของ skill", bullet=True)
     subheading(doc, "ขั้นตอนการติดตั้ง")
     steps_with_screenshots(doc, "Agent Skill", [
-        "ดาวน์โหลด/บีบอัด skill โฟลเดอร์ skill-sop-sdlc จาก repository Siam-GS-Battery/agent-skill เป็นไฟล์ .zip",
+        "ดาวน์โหลด/บีบอัด skill โฟลเดอร์ skill-sop-sdlc จาก repository agent-skill เป็นไฟล์ .zip",
         "เปิด Claude Desktop ไปที่ Settings > Capabilities > Skills",
         "กด Upload skill แล้วเลือกไฟล์ zip ที่เตรียมไว้",
         "ตรวจสอบว่า skill sopify-sdlc ปรากฏในรายการและเปิดใช้งาน (enabled)",
@@ -303,12 +275,22 @@ def build():
          "เมื่อ SOP มีการเปลี่ยนแปลง ให้แก้ไข SKILL.md ใน branch ใหม่ > เปิด PR ตาม Git Workflow > "
          "หลัง merge แล้วบีบอัดแพ็กเกจใหม่และอัปโหลดเข้า Claude อีกครั้ง เพื่อให้ทุกคนในทีมใช้เวอร์ชันเดียวกัน")
 
+    # ---- 2. Git Workflow ----
+    heading(doc, "2. Git Workflow ตาม SOP-SDLC (บังคับใช้)")
+    prohibition_callout(doc, "ข้อบังคับ — ห้ามฝ่าฝืน", [
+        "ห้าม push ตรงเข้า main/develop — ทั้งสอง branch เป็น protected branch",
+        "แตก branch จาก develop สำหรับงานทั่วไป: feature/ · fix/ · refactor/ · chore/ (ส่วน hotfix/ และ release/ แตกจาก main)",
+        "ตั้งชื่อ branch ตามรูปแบบ <type>/<task-id>-<short-description> เช่น feature/SOF-123-add-login — ใส่ Task ID เสมอ",
+        "เขียน commit message แบบ Conventional Commits เช่น docs: add setup guide",
+        "เปิด Pull Request พร้อมลิงก์ Task Ticket และต้องผ่าน review + CI ก่อน merge แล้วลบ branch หลัง merge",
+    ])
+
     # ---- footer ----
     doc.add_paragraph().paragraph_format.space_after = Pt(8)
     f1 = doc.add_paragraph(); f1.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run(f1, "อ้างอิง: Jira — Docs / SOF-60", size=10, color=GREY)
+    run(f1, "อ้างอิง: Docs / SOF-60", size=10, color=GREY)
     f2 = doc.add_paragraph(); f2.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run(f2, "Repository: github.com/Siam-GS-Battery/agent-skill · จัดทำโดยทีม R&D · GS Battery (Thailand)", size=10, color=GREY)
+    run(f2, "Repository: agent-skill · จัดทำโดยทีม R&D · GS Battery (Thailand)", size=10, color=GREY)
 
     out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SETUP_GUIDE.docx")
     doc.save(out)
