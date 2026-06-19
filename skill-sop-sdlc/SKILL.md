@@ -33,8 +33,8 @@ Pull the matching reference into context when you're actually doing that phase's
 |---|---|---|
 | 0 · Onboarding | new env / access / audit / multi-agent setup | `ref/00_ONBOARDING/` — Welcome, Development_Setup, Access_Request, Audit_Checklist, Multi_Agent_Usage |
 | 1 · Requirements | writing stories, AC, DoR/DoD | `ref/01_REQUIREMENTS/` — 1.1 MoSCoW, 1.2 User_Story, 1.3 Acceptance_Criteria, 1.5 Definition_of_Ready_Done |
-| 2 · Design | wireframes / UI to brand | `ref/02_DESIGN/` — 2.1 Wireframe_with_Figma_Make, 2.2 UI_Design_with_Figma_Make |
-| 3 · Database | schema doc + migrations | `ref/03_DATABASE/` — 3.1 ERD, 3.2 Database_Schema_Document, 3.3 Migration_from_Figma_DataContext |
+| 2 · Design | wireframes / UI to brand | `ref/02_DESIGN/` — Style_Apple |
+| 3 · Database | schema doc + migrations | `ref/03_DATABASE/` — 3.1 ERD, 3.2 Database_Schema_Document, 3.3 Migration_from_DataContext |
 | 4 · Test-Driven Development (TDD) | writing failing tests first, then implementation | `ref/06_TESTING/` (TDD / Unit / Integration) & `ref/04_DEVELOPMENT/Code_Standard_Guide.md` (SOP-DEV-001) |
 | 5 · Continuous Local Preview | running dev servers in background during dev | `ref/04_DEVELOPMENT/4.6_Local_Preview.md` |
 
@@ -65,7 +65,7 @@ Produce a requirements set before any design or code. It must contain:
 - **MoSCoW prioritisation** — every requirement tagged Must / Should / Could / Won't.
 - **User stories** — `As a <role>, I want <goal>, so that <benefit>`, grouped by role and feature.
 - **Acceptance criteria (AC)** — at least one testable criterion per story; AC become the UAT scenarios and the test cases.
-- **Roadmap / timeline** — linked (e.g. Jira), with non-functional requirements (auth model, rate limits, integrations, performance targets).
+- **Roadmap / timeline** — linked (e.g. Task Tracker), with non-functional requirements (auth model, rate limits, integrations, performance targets).
 
 ### Definition of Ready (DoR) — before a task may be started
 
@@ -77,7 +77,7 @@ A task may NOT be picked up until ALL of these are true:
 4. Has a **story-point / time estimate** agreed by senior + junior.
 5. Has **no unresolved blocker**.
 
-UI tasks also need a Figma/wireframe link + stated responsive targets. API tasks also need an API spec (endpoint, method, request/response) + relevant DB schema. Bug tasks also need steps to reproduce + expected vs actual behaviour.
+UI tasks also need a wireframe/UI mockup link + stated responsive targets. API tasks also need an API spec (endpoint, method, request/response) + relevant DB schema. Bug tasks also need steps to reproduce + expected vs actual behaviour.
 
 ### Definition of Done (DoD) — before a task is complete
 
@@ -100,9 +100,9 @@ ALL of these must be true:
 
 ## Phase 2 — Design
 
-Designs are produced with Figma Make (AI) and must always state the brand guideline in the prompt. Reuse these tokens — never invent new ones.
+Designs are produced with AI design tools and must always state the brand guideline in the prompt. Reuse these tokens — never invent new ones.
 
-**อ่านสไตล์ก่อนสร้าง UI ทุกครั้ง (binding).** Before creating or changing ANY UI — wireframe, Figma Make prompt, or frontend component — read `ref/02_DESIGN/Style_Apple.md` (Apple design style: photography-first layout, single Action Blue accent, SF Pro typography ladder, tile rhythm, one-shadow elevation) in full, every time, including when returning to UI work in a new session. UI work that starts without this read gets rejected at review.
+**อ่านสไตล์ก่อนสร้าง UI ทุกครั้ง (binding).** Before creating or changing ANY UI — wireframe, design tool prompt, or frontend component — read `ref/02_DESIGN/Style_Apple.md` (Apple design style: photography-first layout, single Action Blue accent, SF Pro typography ladder, tile rhythm, one-shadow elevation) in full, every time, including when returning to UI work in a new session. UI work that starts without this read gets rejected at review.
 
 ### Brand colors
 
@@ -151,14 +151,15 @@ Desktop 1440px+ (full layout, 32px padding) · Tablet 768–1024px (24px padding
 - Use **Tailwind utility classes** — never inline `style={{}}` (exception: dynamic values not expressible as classes).
 - Convert reusable elements to components (`Button/Primary`, `Input/Default`).
 - Semantic HTML first (`<button>`/`<a>`/`<form>`); Tab-reachable + Enter/Space-activatable; visible focus rings; colour never the sole signal.
+- Export screens PNG @2x, icons/logos SVG; commit to the repo and keep a design README with the design assets link.
 - Every async surface needs **loading + empty + error** states.
-- Export screens PNG @2x, icons/logos SVG; commit to the repo and keep a design README with the Figma link.
+- Export screens PNG @2x, icons/logos SVG; commit to the repo and keep a design README with the design assets link.
 
 ### Quality gate (Phase 2)
 
-✅ colors/typography/spacing match the guideline · ✅ Tab + Enter/Space works · ✅ 375px layout doesn't break · ✅ loading/empty/error states present · ✅ no inline styles for class-expressible values · ✅ Figma exports + README committed.
+✅ colors/typography/spacing match the guideline · ✅ Tab + Enter/Space works · ✅ 375px layout doesn't break · ✅ loading/empty/error states present · ✅ no inline styles for class-expressible values · ✅ UI design exports + README committed.
 
-> Deep reference: `ref/02_DESIGN/2.1_Wireframe_with_Figma_Make.md` (wireframe prompts) and `2.2_UI_Design_with_Figma_Make.md` (full brand prompt + export steps) — and `Style_Apple.md` (Apple design style — **read before creating UI, every time**).
+> Deep reference: `ref/02_DESIGN/` — and `Style_Apple.md` (Apple design style — **read before creating UI, every time**).
 
 ---
 
@@ -222,7 +223,7 @@ Enable RLS on multi-tenant tables and write policies (e.g. users see only `is_ac
 
 ✅ every table has PK + created_at/updated_at + trigger · ✅ FKs declare ON DELETE · ✅ indexes on FK + hot columns · ✅ unique + check constraints set · ✅ data dictionary written · ✅ migrations have UP/DOWN and were tested · ✅ migrations applied to Supabase via `apply_migration` **only after** schema approval recorded · ✅ tables verified via `list_tables`/`get_advisors` · ✅ backup/restore documented.
 
-> Deep reference: `ref/03_DATABASE/3.2_Database_Schema_Document.md` is the full schema-doc structure to reproduce; `3.3_Database_Migration_from_Figma_DataContext.md` walks the DataContext → Supabase migration end to end; `3.1_ERD_Diagram.md` for the relationship map.
+> Deep reference: `ref/03_DATABASE/3.2_Database_Schema_Document.md` is the full schema-doc structure to reproduce; `3.3_Database_Migration_from_DataContext.md` walks the DataContext → Supabase migration end to end; `3.1_ERD_Diagram.md` for the relationship map.
 
 ---
 
@@ -317,7 +318,7 @@ Start the backend first (`cd backend && npm run dev`, confirm `http://localhost:
 | Integration | 20% | Supertest | 100% of endpoints (≥ happy path each) |
 | E2E / UAT | 10% | manual + UAT scenarios | critical paths (login, core, payment) |
 
-Performance: **k6** (load / stress / spike), P95 < 2s on critical paths. Security: **OWASP Top 10** scan (e.g. OWASP ZAP), 0 critical findings.
+Performance: load / stress / spike checks, P95 < 2s on critical paths. Security: OWASP Top 10 scan, 0 critical findings.
 
 ### Practices
 
@@ -329,7 +330,7 @@ Use **Test-Driven Development (TDD)** — write tests **before** writing functio
 
 **Gate 2 — before release:** all integration tests pass · performance P95 < 2s (senior verifies) · security scan 0 critical (senior verifies) · UAT sign-off by PM / stakeholder. If Gate 2 fails → do not deploy to production.
 
-> Deep reference: `ref/06_TESTING/` — 6.2 Unit (Vitest + RTL setup and examples), 6.3 Integration (Supertest), 6.4 Performance (k6 scripts), 6.5 Security (OWASP checks), and `UAT_Scenario_Template.md` for sign-off scenarios.
+> Deep reference: `ref/06_TESTING/` — 6.2 Unit (Vitest + RTL setup and examples), 6.3 Integration (Supertest), 6.4 Performance (load test scripts), 6.5 Security (security scan), and `UAT_Scenario_Template.md` for sign-off scenarios.
 
 ---
 

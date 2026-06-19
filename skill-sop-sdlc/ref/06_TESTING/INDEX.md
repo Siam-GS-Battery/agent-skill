@@ -9,7 +9,7 @@
 | 6.1 | [Testing Strategy Overview](6.1_Testing_Strategy_Overview.md) | ภาพรวมกลยุทธ์การทดสอบ, Testing Pyramid, Coverage เป้าหมาย |
 | 6.2 | [Unit Test Guide](6.2_Unit_Test_Guide.md) | แนวทาง Unit Test สำหรับ React + Node.js ด้วย Vitest |
 | 6.3 | [Integration Test Guide](6.3_Integration_Test_Guide.md) | แนวทาง API Integration Test ด้วย Supertest |
-| 6.4 | [Performance Test Guide](6.4_Performance_Test_Guide.md) | Load / Stress / Spike Test ด้วย k6 |
+| 6.4 | [Performance Test Guide](6.4_Performance_Test_Guide.md) | Load / Stress / Spike Test สำหรับ API |
 | 6.5 | [Security Test Guide](6.5_Security_Test_Guide.md) | Security Test ตาม OWASP Top 10 |
 | - | [UAT Scenario Template](UAT_Scenario_Template.md) | Template สำหรับเขียน UAT scenarios |
 | - | UAT_scenario.docx | เอกสาร UAT scenarios (Word format) |
