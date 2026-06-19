@@ -278,11 +278,11 @@ def build():
     # ---- 2. Git Workflow ----
     heading(doc, "2. Git Workflow ตาม SOP-SDLC (บังคับใช้)")
     prohibition_callout(doc, "ข้อบังคับ — ห้ามฝ่าฝืน", [
-        "ห้าม push ตรงเข้า main/develop — ทั้งสอง branch เป็น protected branch",
+        "ห้าม merge ตรงเข้า main/develop — ต้องทำการทดสอบและผ่านการทดสอบบน branch ก่อน merge",
         "แตก branch จาก develop สำหรับงานทั่วไป: feature/ · fix/ · refactor/ · chore/ (ส่วน hotfix/ และ release/ แตกจาก main)",
         "ตั้งชื่อ branch ตามรูปแบบ <type>/<task-id>-<short-description> เช่น feature/SOF-123-add-login — ใส่ Task ID เสมอ",
         "เขียน commit message แบบ Conventional Commits เช่น docs: add setup guide",
-        "เปิด Pull Request พร้อมลิงก์ Task Ticket และต้องผ่าน review + CI ก่อน merge แล้วลบ branch หลัง merge",
+        "ทำการ merge branch เข้า develop/main เมื่อทดสอบผ่านเรียบร้อย และลบ branch หลัง merge เสร็จสิ้น",
     ])
 
     # ---- footer ----

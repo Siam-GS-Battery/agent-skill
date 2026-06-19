@@ -37,7 +37,7 @@
 | Commit ไฟล์ `.env` ลง Git | เพิ่มใน `.gitignore` และใช้ `.env.example` |
 | เขียน inline styles ใน React | ใช้ Tailwind utility classes |
 | ใช้ Class components | ใช้ Functional components + Hooks |
-| Push ตรงไปที่ `main` branch | สร้าง feature branch และเปิด Pull Request |
+| Merge ตรงไปที่ `main` branch โดยไม่ได้ตรวจสอบ | สร้าง feature branch และทำการทดสอบบน local branch ก่อน merge |
 
 ---
 
