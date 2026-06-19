@@ -1,6 +1,6 @@
 ---
 name: sopify-sdlc
-description: "GS Battery end-to-end SDLC SOP — one self-contained playbook for the whole lifecycle, from the team's SOP-SDLC docs. Covers requirements (MoSCoW, user stories, acceptance criteria, DoR/DoD), design (Figma Make brand guideline: colors, IBM Plex Sans typography, spacing, responsive), database (PostgreSQL schema, naming, constraints, indexes, triggers, migrations, RLS), development (Code Standard SOP-DEV-001: TypeScript strict, MVC layering, Zod validation, standard API response, security), and testing (Vitest/Supertest/k6, coverage, quality gates). The full SOP with templates and examples lives in the bundled ref/ folder. Includes a multi-agent pattern (PM, UXUI, Frontend, Backend, Tester) that delegates each phase to an isolated sub-agent so SOP rules are never lost mid-session. Apply at every phase; treat every rule as binding — work was rejected for skipping validation, tests, or pushing straight to main."
+description: "GS Battery end-to-end SDLC SOP — one self-contained playbook for the whole lifecycle, from the team's SOP-SDLC docs. Covers requirements (MoSCoW, user stories, acceptance criteria, DoR/DoD), design (Figma Make brand guideline: colors, IBM Plex Sans typography, spacing, responsive), database (PostgreSQL schema, naming, constraints, indexes, triggers, migrations, RLS), development (Code Standard SOP-DEV-001: TypeScript strict, MVC layering, Zod validation, standard API response, security), and testing (Vitest/Supertest/k6, coverage, quality gates). The full SOP with templates and examples lives in the bundled ref/ folder. Includes a multi-agent pattern (PM, UXUI, Frontend, Backend, Tester) that delegates each phase to an isolated sub-agent so SOP rules are never lost mid-session. Apply at every phase; treat every rule as binding — work was rejected for skipping validation or tests."
 metadata:
   version: 1.4.0
   hermes:
@@ -13,23 +13,21 @@ You are building a GS Battery internal product across the **full software develo
 
 ## Operating Model — how Sopify runs in Claude Cowork
 
-Sopify is a **Working Procedure**, not an app. A Non-Dev User runs it inside Claude Cowork to build a Web App to this SOP, then ships it to Github.
+Sopify is a **Working Procedure**, not an app. A Non-Dev User runs it inside Claude Cowork to build a Web App to this SOP.
 
 ### One-time setup
 - **IT** connects the **Supabase MCP Server** to Cowork.
-- The **User creates their own Github account**, then connects the **Github Connection** in Cowork — the user logs in themselves (credentials are never entered on their behalf). Repo: `https://github.com/SiamGS-Sopify`.
 
 ### Entry point — `/sop`
-The user types **`/sop`** to start. This skill is a **single hub** that links every phase. It is **non-linear**: the user may enter any phase first and jump back and forth freely; the skill keeps each phase's state and artifacts. Free navigation does **not** waive the gates — a phase's output is only "final" once its quality gate passes, and Push is blocked until every phase is complete.
+The user types **`/sop`** to start. This skill is a **single hub** that links every phase. It is **non-linear**: the user may enter any phase first and jump back and forth freely; the skill keeps each phase's state and artifacts. Free navigation does **not** waive the gates — a phase's output is only "final" once its quality gate passes, and completion is blocked until every phase is complete.
 
 ### Phase order (non-linear, revisit allowed)
-Brainstorm → Design (Frontend) → Backend (API) → Database → Test Cases → Local Preview → Push to Github. The order in between is flexible; the **Gate is the single completeness check** before pushing. The **Local Preview** runs the app on the user's machine and shows it to them for sign-off before anything ships.
+Brainstorm → Design (Frontend) → Backend (API) → Database → Test Cases → Local Preview. The order in between is flexible; the **Gate is the single completeness check** before finishing. The **Local Preview** runs the app on the user's machine and shows it to them for sign-off.
 
 ### Connections used per phase
 - **Database phase → Supabase:** when the user reaches Database, they ask IT to create a Supabase project; IT returns the **Token** (URL + `service_role` key for the backend; anon key only if a frontend client calls Supabase directly) via a secure channel; the user connects it via the **Supabase MCP** in Cowork. After the schema doc is approved, the migrations are **applied to Supabase automatically via the Supabase MCP (`apply_migration`)** — no copy-paste into the SQL Editor. The backend connects with `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (server-only, bypasses RLS). Never commit the token — keep it in env.
-- **Push phase → Github:** push code to `SiamGS-Sopify` through the **Github Connection** (no zip handoff).
 
-The phase details below define *how* to do each phase to standard; the operating model above defines *how the user moves through them and ships*.
+The phase details below define *how* to do each phase to standard; the operating model above defines *how the user moves through them*.
 
 ## Multi-Agent Pattern — PM, UXUI Design, Frontend Engineer, Backend Engineer, Tester
 
@@ -243,7 +241,7 @@ Desktop 1440px+ (full layout, 32px padding) · Tablet 768–1024px (24px padding
 
 ✅ colors/typography/spacing match the guideline · ✅ Tab + Enter/Space works · ✅ 375px layout doesn't break · ✅ loading/empty/error states present · ✅ no inline styles for class-expressible values · ✅ Figma exports + README committed.
 
-> Deep reference: `ref/02_DESIGN/2.1_Wireframe_with_Figma_Make.md` (wireframe prompts) and `2.2_UI_Design_with_Figma_Make.md` (full brand prompt + export-to-GitHub steps) — and `Style_Apple.md` (Apple design style — **read before creating UI, every time**).
+> Deep reference: `ref/02_DESIGN/2.1_Wireframe_with_Figma_Make.md` (wireframe prompts) and `2.2_UI_Design_with_Figma_Make.md` (full brand prompt + export steps) — and `Style_Apple.md` (Apple design style — **read before creating UI, every time**).
 
 ---
 
@@ -368,7 +366,7 @@ HTTP codes: 200 OK · 201 created · 400 bad request · 401 unauthenticated · 4
 
 ### Security (strictly enforced)
 
-Validate input with Zod · hash passwords with bcrypt · **parameterized queries only** (never string-interpolate SQL) · secrets in env vars, never hardcoded · never commit `.env` (use `.env.example`) · no inline styles, no class components, no push straight to `main`.
+Validate input with Zod · hash passwords with bcrypt · **parameterized queries only** (never string-interpolate SQL) · secrets in env vars, never hardcoded · never commit `.env` (use `.env.example`) · no inline styles, no class components.
 
 ### Quality gate (Phase 4, per endpoint/feature)
 
