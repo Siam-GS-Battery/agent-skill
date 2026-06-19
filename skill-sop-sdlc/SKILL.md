@@ -297,9 +297,9 @@ Validate input with Zod · hash passwords with bcrypt · **parameterized queries
 
 Sopify is run by a **Non-Dev User** — they need to *see* the working app, not read code. **The developer agent must automatically start the local preview dev servers as soon as development starts and keep them running continuously in the background while working.** This allows the user/orchestrator to view live preview updates at any time, rather than only starting it at the end of the phase. This is a review/approval gate, not a deploy — nothing leaves the user's machine.
 
-Start the backend first (`cd backend && npm run dev`, confirm `http://localhost:5000/api/health` returns ok), then the frontend (`cd frontend && npm run dev`). Confirm the local wiring matches the dev defaults — CORS `ALLOWED_ORIGINS=http://localhost:5173` and `VITE_API_URL=http://localhost:5000/api`.
+Start the backend first (`cd backend && npm run dev`, confirm `http://localhost:5000/api/health` returns ok), then the frontend (`cd frontend && npm run dev`).
 
-To view the live preview directly inside the editor's sidebar/panel, use the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`), run **`Simple Browser: Show`**, and enter `http://localhost:5173`. Walk the user through each core screen mapped to the approved acceptance criteria, and confirm every async surface shows its loading / empty / error states.
+To view the live preview directly inside the editor's sidebar/panel, use the command palette, run **`Simple Browser: Show`**, and enter `http://localhost:5173`. Walk the user through each core screen mapped to the approved acceptance criteria, and confirm every async surface shows its loading / empty / error states.
 
 ### Quality gate (Phase 4.5)
 
