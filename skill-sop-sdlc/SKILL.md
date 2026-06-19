@@ -3,15 +3,15 @@ name: sopify-sdlc
 metadata:
   version: 1.4.0
   hermes:
-    tags: [gs-battery, sopify-vibe, sdlc, requirements, design, database, backend, testing, supabase, react, typescript, postgresql]
+    tags: [gs-battery, sopify-vibe, sdlc, requirements, design, database, backend, testing, react, typescript, postgresql]
 ---
 
 # sopify-sdlc — GS Battery End-to-End SDLC SOP
 
-You are building a GS Battery internal product across the **full software development life cycle**. This skill is the single source of truth and is derived directly from the team's SOP-SDLC documentation — it stands on its own and does not depend on any other skill. The stack is fixed: **React + TypeScript + Tailwind CSS** on the frontend, **Node.js + Express + TypeScript** on the backend, and **PostgreSQL** (via Supabase) for data. Treat every rule below as binding — work that ignores them gets rejected at review.
+You are building a GS Battery internal product across the **full software development life cycle**. This skill is the single source of truth and is derived directly from the team's SOP-SDLC documentation — it stands on its own and does not depend on any other skill. The stack is fixed: **React + TypeScript + Tailwind CSS** on the frontend, **Node.js + Express + TypeScript** on the backend, and **PostgreSQL** for data. Treat every rule below as binding — work that ignores them gets rejected at review.
 
 ### Connections used per phase
-- **Database phase → Supabase:** when the user reaches Database, they ask IT to create a Supabase project; IT returns the **Token** (URL + `service_role` key for the backend; anon key only if a frontend client calls Supabase directly) via a secure channel; the user connects it via the **Supabase MCP** in Cowork. After the schema doc is approved, the migrations are **applied to Supabase automatically via the Supabase MCP (`apply_migration`)** — no copy-paste into the SQL Editor. The backend connects with `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (server-only, bypasses RLS). Never commit the token — keep it in env.
+- **Database phase → PostgreSQL:** After the schema doc is approved, the migrations are applied to the database. The backend connects using a database connection string (`DATABASE_URL`). Never commit credentials — keep them in env.
 
 The phase details below define *how* to do each phase to standard; the operating model above defines *how the user moves through them*.
 
@@ -50,7 +50,7 @@ When executing this SDLC with multiple agents (e.g., an Orchestrator coordinatin
 - **Context & Handover Handlers:** When spawning a new subagent or transferring a task, explicitly communicate the task scope, relevant input files, current Phase Gate status, and the target git branch.
 - **Shared State:** Always maintain [implementation_plan.md](file:///home/orin/.gemini/antigravity-ide/brain/afa5cced-bb59-442e-993b-1fdf9e3859ab/implementation_plan.md) and [task.md](file:///home/orin/.gemini/antigravity-ide/brain/afa5cced-bb59-442e-993b-1fdf9e3859ab/task.md) as the shared source of truth. Subagents must mark their progress in `task.md` (`[/]` for in-progress, `[x]` for completed).
 - **Git Branch Isolation:** Subagents must work on feature-specific branches (e.g., `feature/user-auth`) rather than main or staging. Never commit concurrently from different subagents to avoid conflicts.
-- **Execution Safety:** Ensure no two agents write to the same file concurrently. Keep API tokens and Supabase keys in environment variables; never hardcode or share them.
+- **Execution Safety:** Ensure no two agents write to the same file concurrently. Keep API tokens and database keys in environment variables; never hardcode or share them.
 
 > Deep reference: `ref/00_ONBOARDING/0.5_Multi_Agent_Usage.md` — detailed multi-agent rules, branching, context handover templates, and guardrails.
 
@@ -213,7 +213,7 @@ Index every foreign-key column, every unique natural key, columns frequently use
 
 Name files `[timestamp]_[description].sql` (e.g. `20250115_create_users_table.sql`), include an **UP** section and a commented **DOWN** (rollback) section, one logical change per migration, test against an empty DB and test the rollback before applying to production. Keep a schema changelog (version, date, description, file).
 
-Once the schema doc is approved, **apply migrations to Supabase automatically via the Supabase MCP `apply_migration`** (one file at a time, in dependency order) — use `apply_migration` for DDL so Supabase tracks migration history (`execute_sql` is for read-only verification only). Write DDL to be **idempotent / re-runnable** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`; guard ENUMs with a `DO $$ … EXCEPTION WHEN duplicate_object` block since `CREATE TYPE` has no `IF NOT EXISTS`). After applying, verify with `list_tables` / `list_migrations` / `get_advisors` (security + RLS lints). **Never auto-run destructive operations** (`DROP`/`TRUNCATE`/`ALTER … DROP COLUMN`/DOWN rollback) — those require a separate user approval each time.
+Once the schema doc is approved, apply migrations to the database (one file at a time, in dependency order). Write DDL to be **idempotent / re-runnable** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`; guard ENUMs with a `DO $$ … EXCEPTION WHEN duplicate_object` block since `CREATE TYPE` has no `IF NOT EXISTS`). **Never auto-run destructive operations** (`DROP`/`TRUNCATE`/`ALTER … DROP COLUMN`/DOWN rollback) — those require a separate user approval each time.
 
 ### Row-Level Security & DB security
 
@@ -221,9 +221,9 @@ Enable RLS on multi-tenant tables and write policies (e.g. users see only `is_ac
 
 ### Quality gate (Phase 3)
 
-✅ every table has PK + created_at/updated_at + trigger · ✅ FKs declare ON DELETE · ✅ indexes on FK + hot columns · ✅ unique + check constraints set · ✅ data dictionary written · ✅ migrations have UP/DOWN and were tested · ✅ migrations applied to Supabase via `apply_migration` **only after** schema approval recorded · ✅ tables verified via `list_tables`/`get_advisors` · ✅ backup/restore documented.
+✅ every table has PK + created_at/updated_at + trigger · ✅ FKs declare ON DELETE · ✅ indexes on FK + hot columns · ✅ unique + check constraints set · ✅ data dictionary written · ✅ migrations have UP/DOWN and were tested · ✅ migrations applied to database **only after** schema approval recorded · ✅ backup/restore documented.
 
-> Deep reference: `ref/03_DATABASE/3.2_Database_Schema_Document.md` is the full schema-doc structure to reproduce; `3.3_Database_Migration_from_DataContext.md` walks the DataContext → Supabase migration end to end; `3.1_ERD_Diagram.md` for the relationship map.
+> Deep reference: `ref/03_DATABASE/3.2_Database_Schema_Document.md` is the full schema-doc structure to reproduce; `3.3_Database_Migration_from_DataContext.md` walks the DataContext → PostgreSQL migration end to end; `3.1_ERD_Diagram.md` for the relationship map.
 
 ---
 

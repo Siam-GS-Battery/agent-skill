@@ -8,13 +8,13 @@
 |:-----:|:-------|:---------|
 | 3.1 | [ERD Diagram](3.1_ERD_Diagram.md) | Entity Relationship Diagram |
 | 3.2 | [Database Schema](3.2_Database_Schema_Document.md) | Schema รายละเอียด (tables, relations, enums, indexes) |
-| 3.3 | [Database Migration](3.3_Database_Migration_from_DataContext.md) | Migration จาก DataContext ไปยัง Supabase |
+| 3.3 | [Database Migration](3.3_Database_Migration_from_DataContext.md) | Migration จาก DataContext ไปยัง PostgreSQL |
 
 ## ลำดับการอ่านแนะนำ
 
 1. ดู **ERD Diagram** เพื่อเข้าใจภาพรวมความสัมพันธ์ข้อมูล
 2. อ่าน **Database Schema** สำหรับรายละเอียด tables และ constraints
-3. ทำตาม **Database Migration** เพื่อสร้าง tables จริงใน Supabase
+3. ทำตาม **Database Migration** เพื่อสร้าง tables จริงในฐานข้อมูล PostgreSQL
 
 ## Phase ก่อนหน้า / ถัดไป
 

@@ -6,7 +6,7 @@
 | **เวอร์ชัน** | 2.0.0 |
 | **สถานะ** | บังคับใช้ (Enforced) |
 | **วันที่มีผล** | 30 มกราคม 2026 |
-| **Tech Stack** | React + Node.js + TypeScript + Tailwind CSS + PostgreSQL (Supabase) |
+| **Tech Stack** | React + Node.js + TypeScript + Tailwind CSS + PostgreSQL (PostgreSQL) |
 
 ---
 
