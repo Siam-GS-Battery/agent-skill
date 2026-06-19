@@ -404,7 +404,7 @@ Performance: **k6** (load / stress / spike), P95 < 2s on critical paths. Securit
 
 ### Practices
 
-Write tests **alongside** code, not after · Arrange-Act-Assert · name tests by expected behaviour · mock only external dependencies (API, DB) · tests must be independent · test behaviour, not implementation details · never ignore a failing test (fix or delete) · no hardcoded volatile data (e.g. current date). Co-locate unit tests beside the file (`Button.test.tsx`); put integration tests under `__tests__/`.
+Use **Test-Driven Development (TDD)** — write tests **before** writing functional code (Red-Green-Refactor cycle) rather than after · Arrange-Act-Assert · name tests by expected behaviour · mock only external dependencies (API, DB) · tests must be independent · test behaviour, not implementation details · never ignore a failing test (fix or delete) · no hardcoded volatile data (e.g. current date). Co-locate unit tests beside the file (`Button.test.tsx`); put integration tests under `__tests__/`.
 
 ### Two quality gates
 
@@ -424,7 +424,7 @@ Write tests **alongside** code, not after · Arrange-Act-Assert · name tests by
 - Enforce DoR before starting a task and DoD before merging.
 - Validate every request with Zod; return the one standard response shape.
 - Give every table a PK + `created_at`/`updated_at` + trigger; index foreign keys; declare ON DELETE on every FK.
-- Write tests alongside code; meet coverage targets; keep CI green.
+- Use Test-Driven Development (TDD) by writing failing tests before writing functional code; meet coverage targets; keep CI green.
 
 ## DO NOT
 
