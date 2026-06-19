@@ -161,17 +161,16 @@ A task may NOT be picked up until ALL of these are true:
 
 UI tasks also need a Figma/wireframe link + stated responsive targets. API tasks also need an API spec (endpoint, method, request/response) + relevant DB schema. Bug tasks also need steps to reproduce + expected vs actual behaviour.
 
-### Definition of Done (DoD) — before a PR may be merged
+### Definition of Done (DoD) — before a task is complete
 
 ALL of these must be true:
 
 1. Code meets **every** acceptance criterion.
 2. **Unit tests** written for new logic.
-3. **CI passes** — lint, type-check, tests, build, all green.
+3. **Local checks pass** — lint, type-check, tests, build, all green.
 4. No `console.log` / debug code / hardcoded values left.
-5. **Senior review passed** — no open MUST comments.
-6. **Asana task linked** in the PR description.
-7. **Docs updated** if API/flow changed.
+5. **Peer review passed** — no open MUST comments.
+6. **Docs updated** if API/flow changed.
 
 ### Quality gate (Phase 1)
 
@@ -408,7 +407,7 @@ Use **Test-Driven Development (TDD)** — write tests **before** writing functio
 
 ### Two quality gates
 
-**Gate 1 — every PR (CI-enforced):** lint + type-check 0 errors · all unit tests pass · new-code coverage ≥ 70% · no `console.log` / debug code. If Gate 1 fails → do not request review.
+**Gate 1 — local checks (locally-enforced):** lint + type-check 0 errors · all unit tests pass · new-code coverage ≥ 70% · no `console.log` / debug code. If Gate 1 fails → do not request review.
 
 **Gate 2 — before release:** all integration tests pass · performance P95 < 2s (senior verifies) · security scan 0 critical (senior verifies) · UAT sign-off by PM / stakeholder. If Gate 2 fails → do not deploy to production.
 
@@ -424,7 +423,7 @@ Use **Test-Driven Development (TDD)** — write tests **before** writing functio
 - Enforce DoR before starting a task and DoD before merging.
 - Validate every request with Zod; return the one standard response shape.
 - Give every table a PK + `created_at`/`updated_at` + trigger; index foreign keys; declare ON DELETE on every FK.
-- Use Test-Driven Development (TDD) by writing failing tests before writing functional code; meet coverage targets; keep CI green.
+- Use Test-Driven Development (TDD) by writing failing tests before writing functional code; meet coverage targets; keep all tests green.
 
 ## DO NOT
 
