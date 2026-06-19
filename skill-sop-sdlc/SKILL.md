@@ -18,7 +18,7 @@ The phase details below define *how* to do each phase to standard; the operating
 ## The SDLC journey (do not skip phases)
 
 ```
-0. Onboarding → 1. Requirements → 2. Design → 3. Database → 4. Development → 4.5 Local Preview → 6. Testing
+0. Onboarding → 1. Requirements → 2. Design → 3. Database → 4. Test-Driven Development (TDD) [with Continuous Local Preview]
 ```
 
 Each phase has a **gate** that must pass before the next begins. Do not start a downstream phase on an unapproved upstream artifact: API shape derives from the schema, the schema derives from requirements, and the UI derives from acceptance criteria. Churn upstream means wasted work downstream.
@@ -35,9 +35,8 @@ Pull the matching reference into context when you're actually doing that phase's
 | 1 · Requirements | writing stories, AC, DoR/DoD | `ref/01_REQUIREMENTS/` — 1.1 MoSCoW, 1.2 User_Story, 1.3 Acceptance_Criteria, 1.5 Definition_of_Ready_Done |
 | 2 · Design | wireframes / UI to brand | `ref/02_DESIGN/` — 2.1 Wireframe_with_Figma_Make, 2.2 UI_Design_with_Figma_Make |
 | 3 · Database | schema doc + migrations | `ref/03_DATABASE/` — 3.1 ERD, 3.2 Database_Schema_Document, 3.3 Migration_from_Figma_DataContext |
-| 4 · Development | any backend/frontend code | `ref/04_DEVELOPMENT/Code_Standard_Guide.md` (⭐ SOP-DEV-001, read first), 4.1 Project_Init, 4.1.1 Dependencies, 4.2 Import_Wireframes, 4.3 Database_Design, 4.4 Backend_Project, 4.5 Frontend_Integration |
-| 4.5 · Local Preview | running the app to show the user before deploy | `ref/04_DEVELOPMENT/4.6_Local_Preview.md` |
-| 6 · Testing | writing tests / pre-release | `ref/06_TESTING/` — 6.1 Strategy, 6.2 Unit, 6.3 Integration, 6.4 Performance, 6.5 Security, UAT_Scenario_Template |
+| 4 · Test-Driven Development (TDD) | writing failing tests first, then implementation | `ref/06_TESTING/` (TDD / Unit / Integration) & `ref/04_DEVELOPMENT/Code_Standard_Guide.md` (SOP-DEV-001) |
+| 5 · Continuous Local Preview | running dev servers in background during dev | `ref/04_DEVELOPMENT/4.6_Local_Preview.md` |
 
 If a request maps cleanly to one phase (e.g. "write the migration", "set up the test runner"), open that phase's reference first so you reproduce the team's exact format rather than a generic one.
 
