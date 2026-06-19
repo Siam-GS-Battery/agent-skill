@@ -760,7 +760,6 @@ async function getProducts(page = 1, pageSize = 20) {
 
 ## 12. Tools & Extensions
 
-> ดูรายละเอียดการติดตั้งที่ [Development Setup](../00_ONBOARDING/0.2_Development_Setup.md)
 
 ### VS Code Extensions (จำเป็น)
 
@@ -821,7 +820,6 @@ module.exports = {
 
 | เอกสาร | ลิงก์ |
 |--------|------|
-| Development Setup | [0.2 Development Setup](../00_ONBOARDING/0.2_Development_Setup.md) |
 | Branching Strategy | [7.1 Branching Strategy](../07_GIT_WORKFLOW/7.1_Branching_Strategy.md) |
 | Commit Convention | [7.2 Commit Message Convention](../07_GIT_WORKFLOW/7.2_Commit_Message_Convention.md) |
 | Pull Request Process | [7.3 Pull Request Process](../07_GIT_WORKFLOW/7.3_Pull_Request_Process.md) |

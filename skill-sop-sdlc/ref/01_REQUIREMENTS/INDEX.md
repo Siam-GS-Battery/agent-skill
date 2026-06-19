@@ -18,9 +18,6 @@
 3. ดู **Acceptance Criteria** เพื่อรู้ว่า AC เขียนยังไง
 4. ดู **Definition of Ready & Done** เพื่อรู้ว่า "พร้อมทำ" และ "เสร็จจริง" คืออะไร
 
-## Phase ก่อนหน้า / ถัดไป
-
-- ก่อนหน้า: [Phase 0 — Onboarding](../00_ONBOARDING/INDEX.md)
 - ถัดไป: [Phase 2 — Design](../02_DESIGN/INDEX.md)
 
 ---

@@ -18,7 +18,7 @@ The phase details below define *how* to do each phase to standard; the operating
 ## The SDLC journey (do not skip phases)
 
 ```
-0. Onboarding → 1. Requirements → 2. Design → 3. Database → 4. Test-Driven Development (TDD) [with Continuous Local Preview]
+1. Requirements → 2. Design → 3. Database → 4. Test-Driven Development (TDD) [with Continuous Local Preview]
 ```
 
 Each phase has a **gate** that must pass before the next begins. Do not start a downstream phase on an unapproved upstream artifact: API shape derives from the schema, the schema derives from requirements, and the UI derives from acceptance criteria. Churn upstream means wasted work downstream.
@@ -31,7 +31,6 @@ Pull the matching reference into context when you're actually doing that phase's
 
 | Phase | When to read | Key reference files |
 |---|---|---|
-| 0 · Onboarding | new env / access / audit / multi-agent setup | `ref/00_ONBOARDING/` — Welcome, Development_Setup, Access_Request, Audit_Checklist, Multi_Agent_Usage |
 | 1 · Requirements | writing stories, AC, DoR/DoD | `ref/01_REQUIREMENTS/` — 1.1 MoSCoW, 1.2 User_Story, 1.3 Acceptance_Criteria, 1.5 Definition_of_Ready_Done |
 | 2 · Design | wireframes / UI to brand | `ref/02_DESIGN/` — Style_Apple |
 | 3 · Database | schema doc + migrations | `ref/03_DATABASE/` — 3.1 ERD, 3.2 Database_Schema_Document, 3.3 Migration_from_DataContext |
@@ -52,7 +51,7 @@ When executing this SDLC with multiple agents (e.g., an Orchestrator coordinatin
 - **Git Branch Isolation:** Subagents must work on feature-specific branches (e.g., `feature/user-auth`) rather than main or staging. Never commit concurrently from different subagents to avoid conflicts.
 - **Execution Safety:** Ensure no two agents write to the same file concurrently. Keep API tokens and database keys in environment variables; never hardcode or share them.
 
-> Deep reference: `ref/00_ONBOARDING/0.5_Multi_Agent_Usage.md` — detailed multi-agent rules, branching, context handover templates, and guardrails.
+
 
 ---
 
