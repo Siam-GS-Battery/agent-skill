@@ -240,7 +240,7 @@ def build():
     title.paragraph_format.space_before = Pt(20)
     run(title, "คู่มือการติดตั้งและตั้งค่าเครื่องมือ (Setup Guide)", size=24, bold=True, color=NAVY)
     sub = doc.add_paragraph(); sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run(sub, "Supabase MCP · GitHub MCP · Agent Skill", size=15, color=BLUE)
+    run(sub, "GitHub MCP · Agent Skill", size=15, color=BLUE)
     p1 = doc.add_paragraph(); p1.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run(p1, "โครงการ [RD-M-26-O7-Q1-KR6.4/AI] Sopify & Risk Management AI Strategy", size=12, color=GREY)
     p2 = doc.add_paragraph(); p2.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -248,50 +248,16 @@ def build():
 
     heading(doc, "บทนำ", size=18)
     body(doc,
-         "เอกสารฉบับนี้เป็นคู่มือสำหรับทีมพัฒนาในการติดตั้งและตั้งค่าเครื่องมือหลัก 3 รายการที่ใช้ในโครงการ "
-         "ได้แก่ Supabase MCP สำหรับเชื่อมต่อฐานข้อมูล, GitHub MCP สำหรับจัดการ source code และ Pull Request, "
+         "เอกสารฉบับนี้เป็นคู่มือสำหรับทีมพัฒนาในการติดตั้งและตั้งค่าเครื่องมือหลัก 2 รายการที่ใช้ในโครงการ "
+         "ได้แก่ GitHub MCP สำหรับจัดการ source code และ Pull Request, "
          "และ Agent Skill (skill-sop-sdlc) ซึ่งเป็นชุดมาตรฐาน SOP-SDLC ของทีม GS Battery")
     body(doc,
          "หมายเหตุสำหรับผู้เริ่มต้น: MCP (Model Context Protocol) คือ \"ช่องทางเชื่อมต่อมาตรฐาน\" "
-         "ที่ทำให้ Claude ทำงานร่วมกับระบบภายนอก (เช่น ฐานข้อมูลหรือ GitHub) ได้โดยตรงและปลอดภัย "
+         "ที่ทำให้ Claude ทำงานร่วมกับระบบภายนอก (เช่น GitHub) ได้โดยตรงและปลอดภัย "
          "เปรียบเหมือนปลั๊กมาตรฐานที่เสียบใช้กับอุปกรณ์ได้หลายชนิด")
 
-    # ---- 1. Supabase MCP ----
-    heading(doc, "1. Supabase MCP Setup")
-    subheading(doc, "ภาพรวม")
-    body(doc,
-         "Supabase MCP ช่วยให้ Claude เข้าถึงโปรเจกต์ Supabase ได้โดยตรง เช่น การดูโครงสร้างตาราง (schema), "
-         "รัน SQL, จัดการ migration, อ่าน logs และตรวจสอบคำแนะนำด้านความปลอดภัย (advisors) "
-         "โดยไม่ต้องสลับหน้าจอไปที่ Supabase Dashboard")
-    subheading(doc, "สิ่งที่ต้องเตรียม (Prerequisites)")
-    body(doc, "บัญชี Supabase ที่มีสิทธิ์เข้าถึง Organization และโปรเจกต์ของทีม", bullet=True)
-    body(doc, "Claude Desktop / Cowork ที่ล็อกอินด้วยบัญชีองค์กร (gsbattery.co.th)", bullet=True)
-    subheading(doc, "ขั้นตอนการติดตั้ง")
-    steps_with_screenshots(doc, "Supabase MCP", [
-        "เปิด Claude Desktop ไปที่ Settings > Connectors > Add custom connector",
-        "กรอก Remote MCP server URL ของ Supabase: https://mcp.supabase.com/mcp",
-        "กด Connect ระบบจะเปิดหน้า OAuth ให้ล็อกอิน Supabase และกด Authorize เพื่ออนุญาตสิทธิ์",
-        "เลือก Organization และจำกัดขอบเขต (scope) ให้เข้าถึงเฉพาะโปรเจกต์ที่ใช้งานจริง",
-        "ทดสอบการเชื่อมต่อ เช่น สั่งให้ Claude เรียก list_tables เพื่อดูรายชื่อตารางในฐานข้อมูล",
-    ])
-    subheading(doc, "เครื่องมือที่ใช้บ่อย (อธิบายสำหรับผู้ไม่มีพื้นฐาน)")
-    tools_table(doc, [
-        ["list_tables", "ดูรายชื่อและโครงสร้างของตารางทั้งหมดในฐานข้อมูล เหมือนเปิดดูสารบัญว่ามีตารางอะไรบ้าง", "ก่อนเริ่มทำงานกับฐานข้อมูล เพื่อรู้ว่ามีข้อมูลอะไรบ้าง"],
-        ["execute_sql", "สั่งรันคำสั่ง SQL เพื่อค้นหาหรือจัดการข้อมูล (SQL คือภาษาที่ใช้ \"คุย\" กับฐานข้อมูล)", "เมื่อต้องการดึงข้อมูลหรือทดสอบคำสั่ง"],
-        ["apply_migration", "บันทึกการเปลี่ยนแปลงโครงสร้างฐานข้อมูล (เช่น เพิ่มตาราง/คอลัมน์) อย่างเป็นขั้นตอน มีการบันทึกเวอร์ชันและตรวจสอบย้อนหลังได้ (การย้อนกลับต้องสร้าง migration ใหม่)", "เมื่อต้องแก้โครงสร้างฐานข้อมูลจริง"],
-        ["get_logs", "อ่านบันทึกการทำงาน (logs) ของระบบ เพื่อหาสาเหตุเมื่อเกิดปัญหา", "เมื่อต้องการตรวจหาข้อผิดพลาด (debug)"],
-        ["get_advisors", "ให้ระบบตรวจและแนะนำจุดเสี่ยงด้านความปลอดภัยและประสิทธิภาพให้อัตโนมัติ", "ตรวจสุขภาพโปรเจกต์เป็นระยะ"],
-        ["generate_typescript_types", "สร้างชนิดข้อมูล (types) ของ TypeScript จากฐานข้อมูลให้อัตโนมัติ ลดข้อผิดพลาดเวลาเขียนโค้ด", "หลังแก้ไขโครงสร้างฐานข้อมูล"],
-    ])
-    heading(doc, "ข้อควรระวังตาม SOP", size=15, color=RED, space_before=10)
-    body(doc, "ก่อนแก้ schema ให้เรียก list_tables เพื่อดูโครงสร้างปัจจุบันก่อนเสมอ และทดสอบบน branch ก่อน apply กับโปรเจกต์จริง", bullet=True)
-    prohibition_callout(doc, "ข้อห้าม / ต้องปฏิบัติตามอย่างเคร่งครัด", [
-        "ห้าม hardcode credentials — เก็บ secrets ไว้ใน environment variables และห้าม commit ไฟล์ .env เข้า repository",
-        "ใช้ parameterized queries เท่านั้น และเปิดใช้ RLS (Row Level Security) ตามมาตรฐานฐานข้อมูลของทีม",
-    ])
-
-    # ---- 2. GitHub MCP ----
-    heading(doc, "2. GitHub MCP Setup")
+    # ---- 1. GitHub MCP ----
+    heading(doc, "1. GitHub MCP Setup")
     subheading(doc, "ภาพรวม")
     body(doc,
          "GitHub MCP ช่วยให้ Claude ทำงานกับ repository ขององค์กร Siam-GS-Battery ได้โดยตรง เช่น อ่านไฟล์, "
@@ -308,13 +274,13 @@ def build():
     prohibition_callout(doc, "ข้อบังคับ — ห้ามฝ่าฝืน", [
         "ห้าม push ตรงเข้า main/develop — ทั้งสอง branch เป็น protected branch",
         "แตก branch จาก develop สำหรับงานทั่วไป: feature/ · fix/ · refactor/ · chore/ (ส่วน hotfix/ และ release/ แตกจาก main)",
-        "ตั้งชื่อ branch ตามรูปแบบ <type>/<asana-task-id>-<short-description> เช่น feature/1234567890-add-login — ใส่ Asana Task ID เสมอ",
+        "ตั้งชื่อ branch ตามรูปแบบ <type>/<jira-task-id>-<short-description> เช่น feature/SOF-123-add-login — ใส่ Jira Task ID เสมอ",
         "เขียน commit message แบบ Conventional Commits เช่น docs: add setup guide",
-        "เปิด Pull Request พร้อมลิงก์ Asana card และต้องผ่าน review + CI ก่อน merge แล้วลบ branch หลัง merge",
+        "เปิด Pull Request พร้อมลิงก์ Jira ticket และต้องผ่าน review + CI ก่อน merge แล้วลบ branch หลัง merge",
     ])
 
-    # ---- 3. Agent Skill ----
-    heading(doc, "3. Agent Skill Setup")
+    # ---- 2. Agent Skill ----
+    heading(doc, "2. Agent Skill Setup")
     subheading(doc, "ภาพรวม")
     body(doc,
          "Agent Skill คือชุดความรู้และข้อกำหนดที่สอนให้ Claude ทำงานตามมาตรฐานของทีม โดย skill หลักของโครงการคือ "
@@ -340,7 +306,7 @@ def build():
     # ---- footer ----
     doc.add_paragraph().paragraph_format.space_after = Pt(8)
     f1 = doc.add_paragraph(); f1.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run(f1, "อ้างอิง: Asana — Docs / SOF-60 (1215605704341618)", size=10, color=GREY)
+    run(f1, "อ้างอิง: Jira — Docs / SOF-60", size=10, color=GREY)
     f2 = doc.add_paragraph(); f2.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run(f2, "Repository: github.com/Siam-GS-Battery/agent-skill · จัดทำโดยทีม R&D · GS Battery (Thailand)", size=10, color=GREY)
 
