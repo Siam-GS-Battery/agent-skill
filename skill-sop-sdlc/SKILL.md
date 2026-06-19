@@ -65,7 +65,7 @@ Produce a requirements set before any design or code. It must contain:
 - **MoSCoW prioritisation** — every requirement tagged Must / Should / Could / Won't.
 - **User stories** — `As a <role>, I want <goal>, so that <benefit>`, grouped by role and feature.
 - **Acceptance criteria (AC)** — at least one testable criterion per story; AC become the UAT scenarios and the test cases.
-- **Roadmap / timeline** — linked (e.g. Asana), with non-functional requirements (auth model, rate limits, integrations, performance targets).
+- **Roadmap / timeline** — linked (e.g. Jira), with non-functional requirements (auth model, rate limits, integrations, performance targets).
 
 ### Definition of Ready (DoR) — before a task may be started
 
