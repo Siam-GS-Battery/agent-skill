@@ -31,7 +31,7 @@ Pull the matching reference into context when you're actually doing that phase's
 
 | Phase | When to read | Key reference files |
 |---|---|---|
-| 0 · Onboarding | new env / access / audit setup | `ref/00_ONBOARDING/` — Welcome, Development_Setup, Access_Request, Audit_Checklist |
+| 0 · Onboarding | new env / access / audit / multi-agent setup | `ref/00_ONBOARDING/` — Welcome, Development_Setup, Access_Request, Audit_Checklist, Multi_Agent_Usage |
 | 1 · Requirements | writing stories, AC, DoR/DoD | `ref/01_REQUIREMENTS/` — 1.1 MoSCoW, 1.2 User_Story, 1.3 Acceptance_Criteria, 1.5 Definition_of_Ready_Done |
 | 2 · Design | wireframes / UI to brand | `ref/02_DESIGN/` — 2.1 Wireframe_with_Figma_Make, 2.2 UI_Design_with_Figma_Make |
 | 3 · Database | schema doc + migrations | `ref/03_DATABASE/` — 3.1 ERD, 3.2 Database_Schema_Document, 3.3 Migration_from_Figma_DataContext |
@@ -39,6 +39,22 @@ Pull the matching reference into context when you're actually doing that phase's
 | 5 · Continuous Local Preview | running dev servers in background during dev | `ref/04_DEVELOPMENT/4.6_Local_Preview.md` |
 
 If a request maps cleanly to one phase (e.g. "write the migration", "set up the test runner"), open that phase's reference first so you reproduce the team's exact format rather than a generic one.
+
+---
+
+## Multi-Agent Orchestration & Usage
+
+When executing this SDLC with multiple agents (e.g., an Orchestrator coordinating specialized subagents for PM, DB, Development, or QA), the following protocols are binding:
+
+- **Role Specialization:** Keep agents within their defined domains. PM agents focus on Requirements (Phase 1); DB agents focus on Database Schemas and Migrations (Phase 3); Developer agents write code and run local previews (Phase 4 & 4.5); Tester agents write unit/integration tests (Phase 6).
+- **Context & Handover Handlers:** When spawning a new subagent or transferring a task, explicitly communicate the task scope, relevant input files, current Phase Gate status, and the target git branch.
+- **Shared State:** Always maintain [implementation_plan.md](file:///home/orin/.gemini/antigravity-ide/brain/afa5cced-bb59-442e-993b-1fdf9e3859ab/implementation_plan.md) and [task.md](file:///home/orin/.gemini/antigravity-ide/brain/afa5cced-bb59-442e-993b-1fdf9e3859ab/task.md) as the shared source of truth. Subagents must mark their progress in `task.md` (`[/]` for in-progress, `[x]` for completed).
+- **Git Branch Isolation:** Subagents must work on feature-specific branches (e.g., `feature/user-auth`) rather than main or staging. Never commit concurrently from different subagents to avoid conflicts.
+- **Execution Safety:** Ensure no two agents write to the same file concurrently. Keep API tokens and Supabase keys in environment variables; never hardcode or share them.
+
+> Deep reference: `ref/00_ONBOARDING/0.5_Multi_Agent_Usage.md` — detailed multi-agent rules, branching, context handover templates, and guardrails.
+
+---
 
 ---
 
@@ -324,6 +340,7 @@ Use **Test-Driven Development (TDD)** — write tests **before** writing functio
 - Validate every request with Zod; return the one standard response shape.
 - Give every table a PK + `created_at`/`updated_at` + trigger; index foreign keys; declare ON DELETE on every FK.
 - Use Test-Driven Development (TDD) by writing failing tests before writing functional code; meet coverage targets; keep all tests green.
+- Follow Multi-Agent isolation rules; ensure subagents work on feature-specific branches and coordinate via planning and task list markdown files.
 
 ## DO NOT
 
@@ -332,6 +349,8 @@ Use **Test-Driven Development (TDD)** — write tests **before** writing functio
 - **Echo internal `err.message`** in unhandled 5xx responses, or put business logic in controllers.
 - **Interpolate strings into SQL** — parameterize. **Hardcode or commit secrets** — ever.
 - **Ignore a failing test.**
+- **Write to the same files concurrently** from multiple agents.
+- **Share or hardcode sensitive tokens/secrets** between agent sessions.
 
 ## Overall quality gate before declaring the project "done"
 
@@ -340,3 +359,4 @@ Use **Test-Driven Development (TDD)** — write tests **before** writing functio
 3. ✅ Schema document approved; migrations applied with UP/DOWN; constraints, indexes, and triggers in place.
 4. ✅ Code passes the per-endpoint gate; strict TS, MVC-layered, validated, standard response shape.
 5. ✅ Testing Gate 1 (local checks) and Gate 2 (pre-release) both passed; coverage targets met.
+6. ✅ Multi-Agent protocols followed (branch isolation, single-source task tracking, no concurrent file write conflicts).
