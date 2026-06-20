@@ -1,7 +1,7 @@
 ---
 name: sop
 metadata:
-  version: 1.7.0
+  version: 1.8.0
   hermes:
     tags: [gs-battery, sopify-vibe, sdlc, requirements, design, database, backend, testing, react, typescript, postgresql]
 ---
@@ -18,8 +18,9 @@ The phase details below define *how* to do each phase to standard; the operating
 ## The SDLC journey (do not skip phases)
 
 ```
-1. Requirements → 2. Design → 3. Database → 4. Test-Driven Development (TDD)
+1. Requirements → 2. Design → 3. Database → 4. Test-Driven Development (TDD) → 5. Write Code
 ```
+**Important:** The Development phase includes Test-Driven Development (TDD). You **MUST** write failing tests before writing implementation code for both backend and frontend.
 
 Each phase has a **gate** that must pass before the next begins. Do not start a downstream phase on an unapproved upstream artifact: API shape derives from the schema, the schema derives from requirements, and the UI derives from acceptance criteria. Churn upstream means wasted work downstream.
 
@@ -34,7 +35,8 @@ Pull the matching reference into context when you're actually doing that phase's
 | 1 · Requirements | writing stories, AC, DoR/DoD | `ref/01_REQUIREMENTS/` — 1.1 MoSCoW, 1.2 User_Story, 1.3 Acceptance_Criteria, 1.5 Definition_of_Ready_Done |
 | 2 · Design | wireframes / UI to brand | `ref/02_DESIGN/` — Style_Apple |
 | 3 · Database | schema doc + migrations | `ref/03_DATABASE/` — 3.1 ERD, 3.2 Database_Schema_Document, 3.3 Migration_from_DataContext |
-| 4 · Test-Driven Development (TDD) | writing failing tests first, then implementation | `ref/06_TESTING/` (TDD / Unit / Integration) & `ref/04_DEVELOPMENT/Code_Standard_Guide.md` (SOP-DEV-001) |
+| 4 · Test-Driven Development (TDD) | writing failing tests first (Red cycle) | `ref/06_TESTING/` (TDD / Unit / Integration) |
+| 5 · Write Code | implementation code (Green-Refactor cycle) | `ref/04_DEVELOPMENT/Code_Standard_Guide.md` (SOP-DEV-001) & reference files `4.1_Project_Initialization.md`, `4.4_Backend_Project.md`, `4.5_Frontend_Integration.md` |
 
 If a request maps cleanly to one phase (e.g. "write the migration", "set up the test runner"), open that phase's reference first so you reproduce the team's exact format rather than a generic one.
 
@@ -44,7 +46,7 @@ If a request maps cleanly to one phase (e.g. "write the migration", "set up the 
 
 When executing this SDLC with multiple agents (e.g., an Orchestrator coordinating specialized subagents for PM, DB, Development, or QA), the following protocols are binding:
 
-- **Role Specialization:** Keep agents within their defined domains. PM agents focus on Requirements (Phase 1); DB agents focus on Database Schemas and Migrations (Phase 3); Developer agents write code (Phase 4); Tester agents write unit/integration tests (Phase 6).
+- **Role Specialization:** Keep agents within their defined domains. PM agents focus on Requirements (Phase 1); DB agents focus on Database Schemas and Migrations (Phase 3); Tester agents write tests first (Phase 4) and E2E/integration tests (Phase 6); Developer agents write implementation code (Phase 5).
 - **Context & Handover Handlers:** When spawning a new subagent or transferring a task, explicitly communicate the task scope, relevant input files, current Phase Gate status, and the target git branch.
 - **Shared State:** Always maintain [implementation_plan.md](file:///home/orin/.gemini/antigravity-ide/brain/afa5cced-bb59-442e-993b-1fdf9e3859ab/implementation_plan.md) and [task.md](file:///home/orin/.gemini/antigravity-ide/brain/afa5cced-bb59-442e-993b-1fdf9e3859ab/task.md) as the shared source of truth. Subagents must mark their progress in `task.md` (`[/]` for in-progress, `[x]` for completed).
 - **Git Branch Isolation:** Subagents must work on feature-specific branches (e.g., `feature/user-auth`) rather than main or staging. Never commit concurrently from different subagents to avoid conflicts.
@@ -221,11 +223,15 @@ Enable RLS on multi-tenant tables and write policies (e.g. users see only `is_ac
 
 ---
 
-## Phase 4 — Test-Driven Development (TDD) & Development (Code Standard SOP-DEV-001, enforced)
+## Phase 4 — Test-Driven Development (TDD)
 
 ### Test-Driven Development (TDD) — Test Before Dev
 
 - **Write tests before functional code:** Always write failing tests first (unit/integration) for any new business logic or endpoint before implementing the logic itself. Follow the Red-Green-Refactor cycle (write failing test -> implement code -> refactor). No functional code changes are allowed before writing tests.
+
+---
+
+## Phase 5 — Write Code (Code Standard SOP-DEV-001, enforced)
 
 ### Naming conventions
 
@@ -284,7 +290,7 @@ HTTP codes: 200 OK · 201 created · 400 bad request · 401 unauthenticated · 4
 
 Validate input with Zod · hash passwords with bcrypt · **parameterized queries only** (never string-interpolate SQL) · secrets in env vars, never hardcoded · never commit `.env` (use `.env.example`) · no inline styles, no class components.
 
-### Quality gate (Phase 4, per endpoint/feature)
+### Quality gate (Phase 5, per endpoint/feature)
 
 ✅ Zod covers body/query/params · ✅ auth applied (or comment justifying public) · ✅ standard response shape, custom error classes, global handler · ✅ service is unit-testable (no `req`/`res`) · ✅ no `any`, no `console.log`, no hardcoded secrets · ✅ logic in service not controller · ✅ Pack code to be a container every time (Dockerfiles and docker-compose updated and verified) · ✅ Test before dev (failing tests written first via TDD).
 
