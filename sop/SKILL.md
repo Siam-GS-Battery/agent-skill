@@ -1,7 +1,7 @@
 ---
 name: sop
 metadata:
-  version: 1.6.0
+  version: 1.7.0
   hermes:
     tags: [gs-battery, sopify-vibe, sdlc, requirements, design, database, backend, testing, react, typescript, postgresql]
 ---
@@ -18,7 +18,7 @@ The phase details below define *how* to do each phase to standard; the operating
 ## The SDLC journey (do not skip phases)
 
 ```
-1. Requirements → 2. Design → 3. Database → 4. Test-Driven Development (TDD) [with Live Preview]
+1. Requirements → 2. Design → 3. Database → 4. Test-Driven Development (TDD)
 ```
 
 Each phase has a **gate** that must pass before the next begins. Do not start a downstream phase on an unapproved upstream artifact: API shape derives from the schema, the schema derives from requirements, and the UI derives from acceptance criteria. Churn upstream means wasted work downstream.
@@ -35,7 +35,6 @@ Pull the matching reference into context when you're actually doing that phase's
 | 2 · Design | wireframes / UI to brand | `ref/02_DESIGN/` — Style_Apple |
 | 3 · Database | schema doc + migrations | `ref/03_DATABASE/` — 3.1 ERD, 3.2 Database_Schema_Document, 3.3 Migration_from_DataContext |
 | 4 · Test-Driven Development (TDD) | writing failing tests first, then implementation | `ref/06_TESTING/` (TDD / Unit / Integration) & `ref/04_DEVELOPMENT/Code_Standard_Guide.md` (SOP-DEV-001) |
-| 5 · Live Preview | running/simulating dev preview based on runtime environment | `ref/04_DEVELOPMENT/4.6_Live_Preview.md` |
 
 If a request maps cleanly to one phase (e.g. "write the migration", "set up the test runner"), open that phase's reference first so you reproduce the team's exact format rather than a generic one.
 
@@ -45,7 +44,7 @@ If a request maps cleanly to one phase (e.g. "write the migration", "set up the 
 
 When executing this SDLC with multiple agents (e.g., an Orchestrator coordinating specialized subagents for PM, DB, Development, or QA), the following protocols are binding:
 
-- **Role Specialization:** Keep agents within their defined domains. PM agents focus on Requirements (Phase 1); DB agents focus on Database Schemas and Migrations (Phase 3); Developer agents write code and run local previews (Phase 4 & 4.5); Tester agents write unit/integration tests (Phase 6).
+- **Role Specialization:** Keep agents within their defined domains. PM agents focus on Requirements (Phase 1); DB agents focus on Database Schemas and Migrations (Phase 3); Developer agents write code (Phase 4); Tester agents write unit/integration tests (Phase 6).
 - **Context & Handover Handlers:** When spawning a new subagent or transferring a task, explicitly communicate the task scope, relevant input files, current Phase Gate status, and the target git branch.
 - **Shared State:** Always maintain [implementation_plan.md](file:///home/orin/.gemini/antigravity-ide/brain/afa5cced-bb59-442e-993b-1fdf9e3859ab/implementation_plan.md) and [task.md](file:///home/orin/.gemini/antigravity-ide/brain/afa5cced-bb59-442e-993b-1fdf9e3859ab/task.md) as the shared source of truth. Subagents must mark their progress in `task.md` (`[/]` for in-progress, `[x]` for completed).
 - **Git Branch Isolation:** Subagents must work on feature-specific branches (e.g., `feature/user-auth`) rather than main or staging. Never commit concurrently from different subagents to avoid conflicts.
@@ -290,28 +289,6 @@ Validate input with Zod · hash passwords with bcrypt · **parameterized queries
 ✅ Zod covers body/query/params · ✅ auth applied (or comment justifying public) · ✅ standard response shape, custom error classes, global handler · ✅ service is unit-testable (no `req`/`res`) · ✅ no `any`, no `console.log`, no hardcoded secrets · ✅ logic in service not controller · ✅ Pack code to be a container every time (Dockerfiles and docker-compose updated and verified) · ✅ Test before dev (failing tests written first via TDD).
 
 > Deep reference: open `ref/04_DEVELOPMENT/Code_Standard_Guide.md` (SOP-DEV-001) **before writing code** — it has the full naming tables, do/don't pairs, and code examples behind every rule above. Then 4.1 Project_Initialization, 4.1.1 Dependencies_Checklist, 4.4 Backend_Project, and 4.5 Frontend_Integration for the build steps.
-
----
-
-## Phase 4.5 — Live Preview (environment-aware)
-
-The goal is a review/approval gate: the non-dev user must SEE the working app.
-Background servers do NOT persist between tool calls, and the sidebar artifact
-view is network-isolated. So:
-- For backend/logic verification, run a scripted scenario (login, create, stock
-  in/out, over-draw guard, dashboard) and show the real JSON output inside ONE shell command (single-run script). Do not run a persistent server.
-- For an interactive SIDEBAR preview, build a self-contained `create_artifact`
-  HTML page (inline CSS/JS, in-memory seed data, light-mode) that mirrors the
-  approved screens. It must NOT call the local backend — the artifact sandbox
-  blocks it. Connector-backed data via window.cowork.callMcpTool is allowed.
-
-### Quality gate (Phase 4.5)
-✅ stack runs and `/api/health` returns ok (verified in a single run) ·
-✅ every core screen mapped to an AC is reachable in the chosen preview ·
-✅ loading/empty/error states render · ✅ user has seen the preview and approved ·
-✅ Pack code to be a container every time (runnable via the root `docker-compose.yml` container stack).
-
-> Deep reference: `ref/04_DEVELOPMENT/4.6_Live_Preview.md` — step-by-step commands to build static previews, run single-run scenarios, and preview troubleshooting (port in use, blank page, CORS, data not loading).
 
 ---
 

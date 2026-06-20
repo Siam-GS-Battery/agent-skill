@@ -58,6 +58,3 @@ npm run dev                   # http://localhost:5173  (proxies /api -> :4000)
 - Single migration file, not a runner/CLI — `psql -f` is enough until there's a 2nd migration.
 - Quantity via `SUM(change)` view, not a cached column — add the column only if the list query measurably slows.
 - No multi-warehouse / suppliers / PO / barcode (MoSCoW "Won't, now").
-- Sandbox live preview (Phase 4.5) wasn't run here — no Postgres in this build
-  environment. Follow "Run it" above to bring it up locally; the dev servers and
-  `/api/health` are wired and ready.
