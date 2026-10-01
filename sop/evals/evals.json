@@ -24,6 +24,70 @@
       "expected_output": "Should invoke the operating model: start at requirements (MoSCoW, user stories, acceptance criteria, DoR/DoD) before design or code, explain the phase/gate flow and that work moves phase by phase, and not jump straight into writing code. Tailored to a non-dev user.",
       "files": [],
       "assertions": []
+    },
+    {
+      "id": 3,
+      "name": "ai-backend-endpoint-clean-architecture",
+      "prompt": "Add a backend endpoint to our FastAPI app that sends an inspection image to the OCR model server and returns the read serial number with its confidence. Follow our standards.",
+      "expected_output": "Starts on a feat/ branch off main. Files split across entities/ (Pydantic request/response), interfaces/ocr.py (Protocol port, justified because the model server may change), adaptor/ocr/ (httpx client implementing the port, shared client from lifespan, explicit timeout from Settings), use_cases/ (service class receiving the port via __init__, no fastapi, no SQL), adaptor/http/ (thin router) and deps.py (the one place choosing the adaptor). Errors raise DomainError and leave in the SOP envelope. Model server URL in Settings and .env.example. Tests written first and named test_<unit>_<scenario>_<expected>: unit test with a fake reader, integration test with testcontainers. House rules applied: OOP, module-qualified imports, three blank lines between defs, stacked parameters, docstring Args/Returns that state meaning rather than type.",
+      "files": [],
+      "assertions": [
+        "No SQL or fastapi import in the use case",
+        "The use case depends on the Protocol, not the concrete adaptor",
+        "Every network call has an explicit timeout",
+        "Three blank lines separate every def",
+        "No `from x import ClassName` imports"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "ai-research-new-approach",
+      "prompt": "I want to try GLM-OCR against PaddleOCR for reading the serial number on the battery label. Set up a place to experiment.",
+      "expected_output": "First creates a branch research/ocr-<slug> off origin/main. Uses the research/ocr/ topic (creating its README with the question, the acceptance metric, and an Approaches comparison table) and adds research/ocr/glm-ocr/ as an approach beside paddleocr/, with its own README (Question, Data with DVC dataset version, How to run, Results, Decision), Taskfile, stages runnable as python -m, results/ gitignored, CPU-only tests, upstream code cloned into repos/ and gitignored. Copies rather than imports anything from paddleocr/. No imports from apps, no production MQTT/DB. Does not put code into packages/ or apps/ yet.",
+      "files": [],
+      "assertions": [
+        "A research/ branch is created before any file is written",
+        "Work lands under research/ocr/<approach>/, not packages/ or apps/",
+        "The topic README compares approaches against the acceptance metric",
+        "Datasets and weights are tracked by DVC, not git"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "ai-promote-research-to-package",
+      "prompt": "The anomaly-detection approach under research/apperances won. Make it usable from the inspection backend.",
+      "expected_output": "Creates a packages/<pkg-name> branch off main. Rewrites (does not move or import) the chosen path into packages/<pkg>/src/<pkg>/ with a small class API, settings-driven thresholds and weight paths, unit and regression tests on a small DVC-tracked set; links it with uv add --package (which writes [tool.uv.sources] workspace = true); the backend's use case calls the package, or the model becomes its own worker app reached through an adaptor; updates Dockerfiles (including every member's pyproject.toml for --frozen) and the compose stack; the package README cites the approach and its numbers; the topic README marks it chosen.",
+      "files": [],
+      "assertions": [
+        "No import from research/ in apps/ or packages/",
+        "Dependency added via uv add --package, not by editing pyproject.toml",
+        "The backend reaches a separate model server only through an adaptor"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "ai-extract-shared-package-from-app",
+      "prompt": "The MQTT controller now needs the battery serial-number parser that currently lives inside the backend. How do I share it?",
+      "expected_output": "Creates a packages/<pkg-name> branch. Moves the parser and its tests out of the backend into a new packages/<kebab-name>/ (src/<snake_name>/ layout, py.typed, uv init --package), stripped of backend framework dependencies; links it into both apps with uv add --package; deletes the backend copy so only one exists; the MQTT app does not import the backend; adds the package to the import-linter forbidden contract and to both apps' Dockerfiles.",
+      "files": [],
+      "assertions": [
+        "Code lands in packages/, not copied into the MQTT app",
+        "The original copy in the backend is removed",
+        "Neither app imports the other"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "ai-new-isolated-app",
+      "prompt": "Create a new microservice that runs the appearance model on frames published by the MQTT controller and writes the verdict to the database.",
+      "expected_output": "Creates an apps/<app-name> branch off main. New apps/<app-name>/ with its own pyproject.toml, Dockerfile (uv sync --frozen --no-dev --no-editable --package), README, .env.example keys, and tests; Clean Architecture layout with adaptor/mqtt/ for the subscription, adaptor/db/ for the write, use_cases/ calling the model package from packages/; lifespan opens the MQTT client, DB pool, and model once; never imports apps/mqtt or apps/backend; added as its own service in docker-compose.yml and starts alone; the apps-independence import-linter contract includes it.",
+      "files": [],
+      "assertions": [
+        "An apps/ branch is created before any file is written",
+        "The app has its own Dockerfile, pyproject.toml, README, and tests",
+        "No import from another app; MQTT and DB are reached through adaptors",
+        "uv run --package <app> pytest runs on its own"
+      ]
     }
   ]
 }
