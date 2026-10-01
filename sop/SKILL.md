@@ -1,14 +1,27 @@
 ---
 name: sop
+description: GS Battery end-to-end SDLC SOP with two tracks — web-dev (React + Node/Express + PostgreSQL) and AI engineering (Python uv monorepo, Clean Architecture microservices, research experiments, model training). Use when starting or building a GS Battery product, writing requirements, UI, schema, tests, backend or frontend code, an AI service, a shared package, or a research experiment.
 metadata:
-  version: 1.8.0
+  version: 1.9.0
   hermes:
-    tags: [gs-battery, sopify-vibe, sdlc, requirements, design, database, backend, testing, react, typescript, postgresql]
+    tags: [gs-battery, sopify-vibe, sdlc, requirements, design, database, backend, testing, react, typescript, postgresql, ai-engineering, python, uv, monorepo, clean-architecture, research]
 ---
 
 # sopify-sdlc — GS Battery End-to-End SDLC SOP
 
-You are building a GS Battery internal product across the **full software development life cycle**. This skill is the single source of truth and is derived directly from the team's SOP-SDLC documentation — it stands on its own and does not depend on any other skill. The stack is fixed and run via containers: **React + TypeScript + Tailwind CSS** on the frontend, **Node.js + Express + TypeScript** on the backend, and **PostgreSQL** for data, orchestrated using Docker Compose. Treat every rule below as binding — work that ignores them gets rejected at review.
+You are building a GS Battery internal product across the **full software development life cycle**. This skill is the single source of truth and is derived directly from the team's SOP-SDLC documentation — it stands on its own and does not depend on any other skill. Every product runs via containers orchestrated with Docker Compose, on one of two **tracks** (Step 0 below). Treat every rule below as binding — work that ignores them gets rejected at review.
+
+## Step 0 — pick the track before anything else
+
+| Track | Pick it when | Stack | How to work |
+|---|---|---|---|
+| **Web-dev** | a business web app: forms, workflows, dashboards, CRUD over a database | **React + TypeScript + Tailwind CSS** frontend, **Node.js + Express + TypeScript** backend, **PostgreSQL** | follow this file as written |
+| **AI** | the product's core is a model or pipeline: inspection, OCR, detection, anomaly, optimization, agentic AI | **Python** services and packages in a **uv workspace monorepo** (FastAPI, Clean Architecture), research experiments, **React** frontend, **PostgreSQL** | read `ref/07_AI_ENGINEERING/AI_TRACK.md` **first**, then follow this file with the overrides it names |
+
+Both tracks share Phases 1–4 and 6, the Multi-Agent rules, and the DoR/DoD below. The AI track
+adds **Phase 0 (branch first)** and **Phase R (Research)**, and replaces the backend half of
+Phase 5 with Python Clean Architecture and the house Python standard. Frontend code on either
+track follows the web-dev Phase 2 and Phase 5 rules. If the track is unclear, ask the user.
 
 ### Connections used per phase
 - **Database phase → PostgreSQL:** After the schema doc is approved, the migrations are applied to the database. The backend connects using a database connection string (`DATABASE_URL`). Never commit credentials — keep them in env.
@@ -18,7 +31,8 @@ The phase details below define *how* to do each phase to standard; the operating
 ## The SDLC journey (do not skip phases)
 
 ```
-1. Requirements → 2. Design → 3. Database → 4. Test-Driven Development (TDD) → 5. Write Code
+Web-dev:  1. Requirements → 2. Design → 3. Database → 4. Test-Driven Development (TDD) → 5. Write Code
+AI:       0. Branch → 1. Requirements → R. Research → 2. Design → 3. Database → 4. TDD → 5. Write Code
 ```
 **Important:** The Development phase includes Test-Driven Development (TDD). You **MUST** write failing tests before writing implementation code for both backend and frontend.
 
@@ -37,6 +51,7 @@ Pull the matching reference into context when you're actually doing that phase's
 | 3 · Database | schema doc + migrations | `ref/03_DATABASE/` — 3.1 ERD, 3.2 Database_Schema_Document, 3.3 Migration_from_DataContext |
 | 4 · Test-Driven Development (TDD) | writing failing tests first (Red cycle) | `ref/06_TESTING/` (TDD / Unit / Integration) |
 | 5 · Write Code | implementation code (Green-Refactor cycle) | `ref/04_DEVELOPMENT/Code_Standard_Guide.md` (SOP-DEV-001) & reference files `4.1_Project_Initialization.md`, `4.4_Backend_Project.md`, `4.5_Frontend_Integration.md` |
+| **AI track** — 0 · R · 5 | before any AI work; research experiments; Python apps and packages | `ref/07_AI_ENGINEERING/` — **AI_TRACK (read first)**, 7.1 Monorepo_Structure, 7.2 Clean_Architecture_Backend, 7.3 Python_Code_Standard, 7.4 Research_Workspace |
 
 If a request maps cleanly to one phase (e.g. "write the migration", "set up the test runner"), open that phase's reference first so you reproduce the team's exact format rather than a generic one.
 
@@ -233,6 +248,11 @@ Enable RLS on multi-tenant tables and write policies (e.g. users see only `is_ac
 
 ## Phase 5 — Write Code (Code Standard SOP-DEV-001, enforced)
 
+> **AI track:** this section governs the **frontend** (React + TypeScript). Python apps,
+> packages, and research code follow `ref/07_AI_ENGINEERING/AI_TRACK.md` instead — Clean
+> Architecture with adaptors, `snake_case` (PEP 8), Pydantic in place of Zod, and the house
+> Python standard (OOP, module-qualified imports, three blank lines between defs).
+
 ### Naming conventions
 
 | Kind | Style | Example |
@@ -300,6 +320,10 @@ Validate input with Zod · hash passwords with bcrypt · **parameterized queries
 
 ## Phase 6 — Testing
 
+> **AI track:** same pyramid, targets, and gates; Python code swaps Vitest for `pytest` and
+> Supertest for `httpx.AsyncClient` + `testcontainers`, and AI features also record their
+> model acceptance metric on a named dataset version (`ref/07_AI_ENGINEERING/AI_TRACK.md`).
+
 ### Testing pyramid + coverage targets
 
 | Level | Share | Tool | Target |
@@ -333,6 +357,7 @@ Use **Test-Driven Development (TDD)** — write tests **before** writing functio
 - Use Test-Driven Development (TDD) by writing failing tests before writing functional code; meet coverage targets; keep all tests green.
 - Follow Multi-Agent isolation rules; ensure subagents work on feature-specific branches and coordinate via planning and task list markdown files.
 - Pack code to be a container every time: maintain up-to-date Dockerfiles for both services and configure docker-compose to bundle all changes.
+- Pick the track at Step 0; on the AI track, read `ref/07_AI_ENGINEERING/AI_TRACK.md` before writing any Python, and branch off `main` before every new experiment, app, or package.
 
 ## DO NOT
 
@@ -354,3 +379,4 @@ Use **Test-Driven Development (TDD)** — write tests **before** writing functio
 5. ✅ Testing Gate 1 (sandbox checks) and Gate 2 (pre-release) both passed; coverage targets met.
 6. ✅ Multi-Agent protocols followed (branch isolation, single-source task tracking, no concurrent file write conflicts).
 7. ✅ Pack code to be a container every time; working Dockerfiles and root compose stack are present and verified.
+8. ✅ AI track only: the Python Definition of Done in `ref/07_AI_ENGINEERING/AI_TRACK.md` passed — zones and DAG respected, apps isolated, layers enforced, research approach chosen and promoted, acceptance metric recorded.
